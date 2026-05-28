@@ -1,2 +1,0 @@
-rootProject.name = "jaegokok"
-include("jaegokok-common", "jaegokok-core", "jaegokok-domain", "jaegokok-infra", "jaegokok-api")
