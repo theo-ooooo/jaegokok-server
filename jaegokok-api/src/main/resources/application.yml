@@ -2,30 +2,15 @@ spring:
   application:
     name: jaegokok
   profiles:
-    active: local
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/jaegokok?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
-    username: root
-    password: root
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: true
-        default_batch_fetch_size: 100
-  data:
-    redis:
-      host: localhost
-      port: 6379
+    group:
+      local: "local"
+      dev: "dev"
+      prod: "prod"
+    include:
+      - datasource
+      - redis
+      - security
+      - docs
 
 server:
   port: 8080
-
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-  api-docs:
-    path: /api-docs
