@@ -7,7 +7,7 @@
 ## 모듈 구조
 
 ```
-jaegokok-common   — ApiResponse, ErrorCode, BusinessException, GlobalExceptionHandler
+jaegokok-common   — GlobalResponse, ErrorCode, CustomException, GlobalExceptionHandler
 jaegokok-core     — JPA 엔티티 기반 클래스(BaseEntity), QueryDSL, JpaConfig
 jaegokok-domain   — 도메인 서비스, DTO, JWT 처리
 jaegokok-infra    — JPA Repository 구현체, Redis, QR 생성 등 외부 연동
@@ -29,7 +29,7 @@ core → common
 |------|------|
 | Java | 21 |
 | Spring Boot | 3.4.5 |
-| Gradle (Kotlin DSL) | - |
+| Gradle (Groovy DSL) | - |
 | MySQL | 8 |
 | Redis | 7 |
 | QueryDSL | 5.1.0 jakarta |
