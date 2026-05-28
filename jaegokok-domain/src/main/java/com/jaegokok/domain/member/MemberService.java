@@ -2,7 +2,6 @@ package com.jaegokok.domain.member;
 
 import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.common.ErrorCode;
-import com.jaegokok.core.auth.RefreshTokenEntity;
 import com.jaegokok.domain.auth.JwtProvider;
 import com.jaegokok.domain.auth.RefreshTokenRepository;
 import io.jsonwebtoken.JwtException;
@@ -45,11 +44,10 @@ public class MemberService {
         }
 
         String accessToken = jwtProvider.generateAccessToken(member.id(), member.role().name());
-        RefreshTokenEntity refreshTokenEntity = jwtProvider.generateRefreshToken(member.id());
+        String refreshToken = jwtProvider.generateRefreshToken(member.id());
+        refreshTokenRepository.save(member.id(), refreshToken, jwtProvider.getRefreshTokenTtlSeconds());
 
-        refreshTokenRepository.save(refreshTokenEntity);
-
-        return LoginResponse.from(accessToken, refreshTokenEntity.getRefreshToken(), member.nickname());
+        return LoginResponse.from(accessToken, refreshToken, member.nickname());
     }
 
     public MemberResponse getMe(Long memberId) {
@@ -61,7 +59,6 @@ public class MemberService {
         memberRepository.withdraw(memberId);
     }
 
-    @Transactional
     public LoginResponse reissue(String refreshToken) {
         if (refreshToken == null) {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
@@ -73,18 +70,17 @@ public class MemberService {
             throw new CustomException(ErrorCode.TOKEN_EXPIRED);
         }
 
-        RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findByRefreshToken(refreshToken)
+        Long memberId = refreshTokenRepository.findMemberIdByToken(refreshToken)
                 .orElseThrow(() -> new CustomException(ErrorCode.TOKEN_EXPIRED));
 
-        Long memberId = refreshTokenEntity.getMemberId();
         Member member = memberRepository.findById(memberId);
 
         String newAccessToken = jwtProvider.generateAccessToken(member.id(), member.role().name());
-        RefreshTokenEntity newRefreshTokenEntity = jwtProvider.generateRefreshToken(member.id());
+        String newRefreshToken = jwtProvider.generateRefreshToken(member.id());
 
-        refreshTokenRepository.deleteByRefreshToken(refreshToken);
-        refreshTokenRepository.save(newRefreshTokenEntity);
+        refreshTokenRepository.deleteByToken(refreshToken);
+        refreshTokenRepository.save(member.id(), newRefreshToken, jwtProvider.getRefreshTokenTtlSeconds());
 
-        return LoginResponse.from(newAccessToken, newRefreshTokenEntity.getRefreshToken(), member.nickname());
+        return LoginResponse.from(newAccessToken, newRefreshToken, member.nickname());
     }
 }

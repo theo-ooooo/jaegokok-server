@@ -1,6 +1,5 @@
 package com.jaegokok.domain.auth;
 
-import com.jaegokok.core.auth.RefreshTokenEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -33,19 +32,19 @@ public class JwtProvider {
                 .compact();
     }
 
-    public RefreshTokenEntity generateRefreshToken(Long memberId) {
+    public String generateRefreshToken(Long memberId) {
         Date now = new Date();
-        Date ttlDate = new Date(now.getTime() + refreshTokenExpiryMs);
-
-        String refreshToken = Jwts.builder()
+        return Jwts.builder()
                 .subject(String.valueOf(memberId))
                 .claim("type", "refresh")
                 .issuedAt(now)
-                .expiration(ttlDate)
+                .expiration(new Date(now.getTime() + refreshTokenExpiryMs))
                 .signWith(signingKey)
                 .compact();
+    }
 
-        return RefreshTokenEntity.of(memberId, refreshToken, refreshTokenExpiryMs / 1000);
+    public long getRefreshTokenTtlSeconds() {
+        return refreshTokenExpiryMs / 1000;
     }
 
     public Claims parseToken(String token) {

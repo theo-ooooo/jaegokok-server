@@ -1,4 +1,4 @@
-package com.jaegokok.core.auth;
+package com.jaegokok.infra.auth;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -30,8 +30,11 @@ public class RefreshTokenEntity {
         this.ttl = ttl;
     }
 
-    public static RefreshTokenEntity of(Long memberId, String refreshToken, Long ttl) {
-       return RefreshTokenEntity.builder().memberId(memberId).refreshToken(refreshToken).ttl(ttl).build();
+    public static RefreshTokenEntity of(Long memberId, String refreshToken, long ttl) {
+        return RefreshTokenEntity.builder()
+                .memberId(memberId)
+                .refreshToken(refreshToken)
+                .ttl(ttl)
+                .build();
     }
-
 }
