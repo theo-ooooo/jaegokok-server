@@ -59,6 +59,6 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     private Member toMember(MemberEntity entity) {
-        return new Member(entity.getId(), entity.getEmail(), entity.getNickname(), entity.getRole(), entity.getCreatedAt());
+        return new Member(entity.getId(), entity.getEmail(), entity.getNickname(), entity.getRole(), entity.getStatus(), entity.getCreatedAt());
     }
 }

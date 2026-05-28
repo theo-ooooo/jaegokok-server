@@ -3,6 +3,8 @@ package com.jaegokok.domain.member;
 import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.common.ErrorCode;
 import com.jaegokok.domain.auth.JwtProvider;
+import com.jaegokok.domain.auth.RefreshTokenRepository;
+import io.jsonwebtoken.JwtException;
 import com.jaegokok.domain.member.dto.LoginRequest;
 import com.jaegokok.domain.member.dto.LoginResponse;
 import com.jaegokok.domain.member.dto.MemberResponse;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
@@ -42,8 +45,9 @@ public class MemberService {
 
         String accessToken = jwtProvider.generateAccessToken(member.id(), member.role().name());
         String refreshToken = jwtProvider.generateRefreshToken(member.id());
+        refreshTokenRepository.save(member.id(), refreshToken, jwtProvider.getRefreshTokenTtlSeconds());
 
-        return new LoginResponse(accessToken, refreshToken, member.nickname());
+        return LoginResponse.from(accessToken, refreshToken, member.nickname());
     }
 
     public MemberResponse getMe(Long memberId) {
@@ -53,5 +57,30 @@ public class MemberService {
     @Transactional
     public void withdraw(Long memberId) {
         memberRepository.withdraw(memberId);
+    }
+
+    public LoginResponse reissue(String refreshToken) {
+        if (refreshToken == null) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
+
+        try {
+            jwtProvider.parseToken(refreshToken);
+        } catch (JwtException e) {
+            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+        }
+
+        Long memberId = refreshTokenRepository.findMemberIdByToken(refreshToken)
+                .orElseThrow(() -> new CustomException(ErrorCode.TOKEN_EXPIRED));
+
+        Member member = memberRepository.findById(memberId);
+
+        String newAccessToken = jwtProvider.generateAccessToken(member.id(), member.role().name());
+        String newRefreshToken = jwtProvider.generateRefreshToken(member.id());
+
+        refreshTokenRepository.deleteByToken(refreshToken);
+        refreshTokenRepository.save(member.id(), newRefreshToken, jwtProvider.getRefreshTokenTtlSeconds());
+
+        return LoginResponse.from(newAccessToken, newRefreshToken, member.nickname());
     }
 }

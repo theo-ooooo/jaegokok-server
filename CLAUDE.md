@@ -102,3 +102,11 @@ docker-compose up -d
 
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - API Docs (JSON): http://localhost:8080/api-docs
+
+## 자동 코드 리뷰 워크플로
+
+**PR이 생성되거나 번호가 언급되면 즉시 `/review <PR번호>` 를 실행한다.**
+
+- 다른 작업을 기다리지 않고 해당 PR 리뷰를 최우선으로 실행
+- 리뷰 결과는 Discord 채널(1486260878687997972)에 공유
+- 리뷰 항목 반영 후 같은 PR에 후속 코멘트로 항목별 처리 결과 보고

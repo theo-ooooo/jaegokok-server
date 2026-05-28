@@ -43,6 +43,10 @@ public class JwtProvider {
                 .compact();
     }
 
+    public long getRefreshTokenTtlSeconds() {
+        return refreshTokenExpiryMs / 1000;
+    }
+
     public Claims parseToken(String token) {
         return Jwts.parser()
                 .verifyWith(signingKey)
