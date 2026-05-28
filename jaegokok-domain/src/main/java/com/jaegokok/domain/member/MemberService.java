@@ -2,7 +2,10 @@ package com.jaegokok.domain.member;
 
 import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.common.ErrorCode;
+import com.jaegokok.core.auth.RefreshTokenEntity;
 import com.jaegokok.domain.auth.JwtProvider;
+import com.jaegokok.domain.auth.RefreshTokenRepository;
+import io.jsonwebtoken.JwtException;
 import com.jaegokok.domain.member.dto.LoginRequest;
 import com.jaegokok.domain.member.dto.LoginResponse;
 import com.jaegokok.domain.member.dto.MemberResponse;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
@@ -41,9 +45,11 @@ public class MemberService {
         }
 
         String accessToken = jwtProvider.generateAccessToken(member.id(), member.role().name());
-        String refreshToken = jwtProvider.generateRefreshToken(member.id());
+        RefreshTokenEntity refreshTokenEntity = jwtProvider.generateRefreshToken(member.id());
 
-        return new LoginResponse(accessToken, refreshToken, member.nickname());
+        refreshTokenRepository.save(refreshTokenEntity);
+
+        return LoginResponse.from(accessToken, refreshTokenEntity.getRefreshToken(), member.nickname());
     }
 
     public MemberResponse getMe(Long memberId) {
@@ -53,5 +59,32 @@ public class MemberService {
     @Transactional
     public void withdraw(Long memberId) {
         memberRepository.withdraw(memberId);
+    }
+
+    @Transactional
+    public LoginResponse reissue(String refreshToken) {
+        if (refreshToken == null) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
+
+        try {
+            jwtProvider.parseToken(refreshToken);
+        } catch (JwtException e) {
+            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+        }
+
+        RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new CustomException(ErrorCode.TOKEN_EXPIRED));
+
+        Long memberId = refreshTokenEntity.getMemberId();
+        Member member = memberRepository.findById(memberId);
+
+        String newAccessToken = jwtProvider.generateAccessToken(member.id(), member.role().name());
+        RefreshTokenEntity newRefreshTokenEntity = jwtProvider.generateRefreshToken(member.id());
+
+        refreshTokenRepository.deleteByRefreshToken(refreshToken);
+        refreshTokenRepository.save(newRefreshTokenEntity);
+
+        return LoginResponse.from(newAccessToken, newRefreshTokenEntity.getRefreshToken(), member.nickname());
     }
 }

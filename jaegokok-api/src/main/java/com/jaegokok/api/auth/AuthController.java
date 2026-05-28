@@ -28,4 +28,9 @@ public class AuthController {
     public GlobalResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return GlobalResponse.success(HttpStatus.OK.value(), memberService.login(request));
     }
+
+    @PostMapping("/refresh")
+    public GlobalResponse<LoginResponse> reissue(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
+        return GlobalResponse.success(HttpStatus.OK.value(), memberService.reissue(refreshToken));
+    }
 }
