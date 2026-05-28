@@ -37,6 +37,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(token)) {
             try {
                 Claims claims = jwtProvider.parseToken(token);
+
+                // refresh token은 인증에 사용 불가
+                if (!"access".equals(claims.get("type", String.class))) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+
                 Long memberId = Long.parseLong(claims.getSubject());
                 String role = claims.get("role", String.class);
 

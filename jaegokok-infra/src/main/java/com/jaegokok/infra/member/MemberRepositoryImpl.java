@@ -20,6 +20,7 @@ public class MemberRepositoryImpl implements MemberRepository {
     @Override
     public Optional<Member> findByEmail(String email) {
         return memberJpaRepository.findByEmail(email)
+                .filter(e -> e.getStatus() != MemberStatus.WITHDRAWN)
                 .map(this::toMember);
     }
 
