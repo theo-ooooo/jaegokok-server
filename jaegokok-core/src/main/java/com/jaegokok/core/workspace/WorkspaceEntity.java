@@ -53,6 +53,11 @@ public class WorkspaceEntity extends BaseEntity {
         this.plan = plan;
     }
 
+    public void update(String name, String description) {
+        if (name != null) this.name = name;
+        if (description != null) this.description = description;
+    }
+
 
 
 
