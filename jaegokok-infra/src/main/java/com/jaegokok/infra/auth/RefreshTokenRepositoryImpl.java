@@ -14,13 +14,13 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
 
     @Override
     public void save(Long memberId, String token, long ttlSeconds) {
-        refreshTokenRedisRepository.save(RefreshTokenEntity.of(memberId, token, ttlSeconds));
+        refreshTokenRedisRepository.save(RefreshTokenRedisHash.of(memberId, token, ttlSeconds));
     }
 
     @Override
     public Optional<Long> findMemberIdByToken(String token) {
         return refreshTokenRedisRepository.findByRefreshToken(token)
-                .map(RefreshTokenEntity::getMemberId);
+                .map(RefreshTokenRedisHash::getMemberId);
     }
 
     @Override

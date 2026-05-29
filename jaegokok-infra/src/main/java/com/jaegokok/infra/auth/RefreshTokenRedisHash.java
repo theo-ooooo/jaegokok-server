@@ -12,7 +12,7 @@ import org.springframework.data.redis.core.index.Indexed;
 @Getter
 @RedisHash(value = "refreshToken")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class RefreshTokenEntity {
+public class RefreshTokenRedisHash {
 
     @Id
     private Long memberId;
@@ -24,14 +24,14 @@ public class RefreshTokenEntity {
     private Long ttl;
 
     @Builder
-    private RefreshTokenEntity(Long memberId, String refreshToken, Long ttl) {
+    private RefreshTokenRedisHash(Long memberId, String refreshToken, Long ttl) {
         this.memberId = memberId;
         this.refreshToken = refreshToken;
         this.ttl = ttl;
     }
 
-    public static RefreshTokenEntity of(Long memberId, String refreshToken, long ttl) {
-        return RefreshTokenEntity.builder()
+    public static RefreshTokenRedisHash of(Long memberId, String refreshToken, long ttl) {
+        return RefreshTokenRedisHash.builder()
                 .memberId(memberId)
                 .refreshToken(refreshToken)
                 .ttl(ttl)
