@@ -5,6 +5,7 @@ import com.jaegokok.common.response.GlobalResponse;
 import com.jaegokok.domain.member.MemberService;
 import com.jaegokok.domain.member.dto.LoginRequest;
 import com.jaegokok.domain.member.dto.LoginResponse;
+import com.jaegokok.domain.member.dto.LoginResult;
 import com.jaegokok.domain.member.dto.MemberResponse;
 import com.jaegokok.domain.member.dto.SignUpRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,26 +29,22 @@ public class AuthController {
 
     @PostMapping("/login")
     public GlobalResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
-        LoginResponse result = memberService.login(request);
-
+        LoginResult result = memberService.login(request);
         CookieUtils.addRefreshToken(response, result.refreshToken(), result.refreshTokenTtlSeconds());
-
-        return GlobalResponse.success(HttpStatus.OK.value(), result);
+        return GlobalResponse.success(HttpStatus.OK.value(), new LoginResponse(result.accessToken(), result.nickname()));
     }
 
     @PostMapping("/refresh")
     public GlobalResponse<LoginResponse> reissue(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
-        LoginResponse result = memberService.reissue(refreshToken);
+        LoginResult result = memberService.reissue(refreshToken);
         CookieUtils.addRefreshToken(response, result.refreshToken(), result.refreshTokenTtlSeconds());
-
-        return GlobalResponse.success(HttpStatus.OK.value(), result);
+        return GlobalResponse.success(HttpStatus.OK.value(), new LoginResponse(result.accessToken(), result.nickname()));
     }
 
     @PostMapping("/logout")
     public GlobalResponse<Void> logout(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
         memberService.logout(refreshToken);
         CookieUtils.clearRefreshToken(response);
-
         return GlobalResponse.success(HttpStatus.OK.value(), null);
     }
 }

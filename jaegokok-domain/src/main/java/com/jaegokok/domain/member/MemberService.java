@@ -6,7 +6,7 @@ import com.jaegokok.domain.auth.JwtProvider;
 import com.jaegokok.domain.auth.RefreshTokenRepository;
 import io.jsonwebtoken.JwtException;
 import com.jaegokok.domain.member.dto.LoginRequest;
-import com.jaegokok.domain.member.dto.LoginResponse;
+import com.jaegokok.domain.member.dto.LoginResult;
 import com.jaegokok.domain.member.dto.MemberResponse;
 import com.jaegokok.domain.member.dto.SignUpRequest;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class MemberService {
         return MemberResponse.from(member);
     }
 
-    public LoginResponse login(LoginRequest request) {
+    public LoginResult login(LoginRequest request) {
         Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(() -> new CustomException(ErrorCode.AUTH_UNAUTHORIZED));
 
@@ -45,10 +45,10 @@ public class MemberService {
 
         String accessToken = jwtProvider.generateAccessToken(member.id(), member.role().name());
         String refreshToken = jwtProvider.generateRefreshToken(member.id());
-        long refreshTokenTtlSeconds = jwtProvider.getRefreshTokenTtlSeconds();
-        refreshTokenRepository.save(member.id(), refreshToken, jwtProvider.getRefreshTokenTtlSeconds());
+        long ttlSeconds = jwtProvider.getRefreshTokenTtlSeconds();
+        refreshTokenRepository.save(member.id(), refreshToken, ttlSeconds);
 
-        return LoginResponse.from(accessToken, refreshToken, member.nickname(), refreshTokenTtlSeconds);
+        return new LoginResult(accessToken, refreshToken, member.nickname(), ttlSeconds);
     }
 
     public MemberResponse getMe(Long memberId) {
@@ -60,7 +60,7 @@ public class MemberService {
         memberRepository.withdraw(memberId);
     }
 
-    public LoginResponse reissue(String refreshToken) {
+    public LoginResult reissue(String refreshToken) {
         if (refreshToken == null) {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
@@ -78,15 +78,18 @@ public class MemberService {
 
         String newAccessToken = jwtProvider.generateAccessToken(member.id(), member.role().name());
         String newRefreshToken = jwtProvider.generateRefreshToken(member.id());
-        long newRefreshTokenTtlSeconds = jwtProvider.getRefreshTokenTtlSeconds();
+        long ttlSeconds = jwtProvider.getRefreshTokenTtlSeconds();
 
         refreshTokenRepository.deleteByToken(refreshToken);
-        refreshTokenRepository.save(member.id(), newRefreshToken, newRefreshTokenTtlSeconds);
+        refreshTokenRepository.save(member.id(), newRefreshToken, ttlSeconds);
 
-        return LoginResponse.from(newAccessToken, newRefreshToken, member.nickname(), newRefreshTokenTtlSeconds);
+        return new LoginResult(newAccessToken, newRefreshToken, member.nickname(), ttlSeconds);
     }
 
     public void logout(String refreshToken) {
+        if (refreshToken == null) {
+            return;
+        }
         refreshTokenRepository.deleteByToken(refreshToken);
     }
 }
