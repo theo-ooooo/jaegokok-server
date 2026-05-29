@@ -1,0 +1,59 @@
+package com.jaegokok.infra.workspace;
+
+import com.jaegokok.common.ErrorCode;
+import com.jaegokok.common.exception.CustomException;
+import com.jaegokok.core.member.MemberEntity;
+import com.jaegokok.core.workspace.WorkspaceEntity;
+import com.jaegokok.core.workspace.WorkspacePlan;
+import com.jaegokok.domain.workspace.Workspace;
+import com.jaegokok.domain.workspace.WorkspaceRepository;
+import com.jaegokok.infra.member.MemberJpaRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+@RequiredArgsConstructor
+public class WorkspaceRepositoryImpl implements WorkspaceRepository {
+    private final WorkspaceJpaRepository workspaceJpaRepository;
+    private final WorkspaceQueryRepository workspaceQueryRepository;
+    private final MemberJpaRepository memberJpaRepository;
+
+    @Override
+    public Workspace save(Long ownerId, String name, String description, WorkspacePlan plan) {
+        MemberEntity member = memberJpaRepository.findById(ownerId).orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        WorkspaceEntity workspace = WorkspaceEntity.from(member, name, description, plan);
+
+        return toWorkspace(workspaceJpaRepository.save(workspace));
+    }
+
+    @Override
+    public Optional<Workspace> findById(Long id) {
+        return workspaceJpaRepository.findById(id).map(this::toWorkspace);
+    }
+
+    @Override
+    public List<Workspace> findAllByMemberId(Long memberId) {
+        return workspaceQueryRepository.findAllByMemberId(memberId)
+                .stream().map(this::toWorkspace).toList();
+    }
+
+    @Override
+    public boolean existsByOwnerId(Long ownerId) {
+        return workspaceJpaRepository.existsByOwner_Id(ownerId);
+    }
+
+    private Workspace toWorkspace(WorkspaceEntity e) {
+        return new Workspace(
+                e.getId(),
+                e.getOwner().getId(),
+                e.getName(),
+                e.getDescription(),
+                e.getPlan(),
+                e.getCreatedAt()
+        );
+    }
+
+}
