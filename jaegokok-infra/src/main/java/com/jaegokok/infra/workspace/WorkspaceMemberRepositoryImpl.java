@@ -1,9 +1,5 @@
 package com.jaegokok.infra.workspace;
 
-import com.jaegokok.common.ErrorCode;
-import com.jaegokok.common.exception.CustomException;
-import com.jaegokok.core.member.MemberEntity;
-import com.jaegokok.core.workspace.WorkspaceEntity;
 import com.jaegokok.core.workspace.WorkspaceMemberEntity;
 import com.jaegokok.core.workspace.WorkspaceMemberRole;
 import com.jaegokok.domain.workspace.WorkspaceMember;
@@ -26,11 +22,11 @@ public class WorkspaceMemberRepositoryImpl implements WorkspaceMemberRepository 
 
     @Override
     public WorkspaceMember save(Long workspaceId, Long memberId, WorkspaceMemberRole role) {
-        WorkspaceEntity workspace = workspaceJpaRepository.findById(workspaceId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        MemberEntity member = memberJpaRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-        WorkspaceMemberEntity entity = WorkspaceMemberEntity.from(workspace, member, role);
+        WorkspaceMemberEntity entity = WorkspaceMemberEntity.from(
+                workspaceJpaRepository.getReferenceById(workspaceId),
+                memberJpaRepository.getReferenceById(memberId),
+                role
+        );
         return toWorkspaceMember(workspaceMemberJpaRepository.save(entity));
     }
 

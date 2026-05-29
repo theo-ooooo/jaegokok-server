@@ -45,8 +45,15 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
         return workspaceJpaRepository.existsByOwner_Id(ownerId);
     }
 
-    private Workspace toWorkspace(WorkspaceEntity workspaceEntity) {
-        return new Workspace(workspaceEntity.getId(), workspaceEntity.getOwner().getId(), workspaceEntity.getName(), workspaceEntity.getDescription(), workspaceEntity.getPlan(), workspaceEntity.getCreatedAt());
+    private Workspace toWorkspace(WorkspaceEntity e) {
+        return new Workspace(
+                e.getId(),
+                e.getOwner().getId(),
+                e.getName(),
+                e.getDescription(),
+                e.getPlan(),
+                e.getCreatedAt()
+        );
     }
 
 }

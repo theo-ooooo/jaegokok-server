@@ -33,17 +33,17 @@ public class WorkspaceEntity extends BaseEntity {
 
 
     @Builder
-    private WorkspaceEntity(MemberEntity member, String name, String description, WorkspacePlan plan) {
-        this.owner = member;
+    private WorkspaceEntity(MemberEntity owner, String name, String description, WorkspacePlan plan) {
+        this.owner = owner;
         this.name = name;
         this.description = description;
         this.plan = plan;
     }
 
-    public static WorkspaceEntity from(MemberEntity member, String name, String description, WorkspacePlan plan) {
+    public static WorkspaceEntity from(MemberEntity owner, String name, String description, WorkspacePlan plan) {
         return WorkspaceEntity.builder()
+                .owner(owner)
                 .name(name)
-                .member(member)
                 .description(description)
                 .plan(plan)
                 .build();
@@ -52,10 +52,6 @@ public class WorkspaceEntity extends BaseEntity {
     public void updatePlan(WorkspacePlan plan) {
         this.plan = plan;
     }
-
-
-
-
 
 
 
