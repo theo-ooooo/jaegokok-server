@@ -31,14 +31,14 @@ public class AuthController {
     public GlobalResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
         LoginResult result = memberService.login(request);
         CookieUtils.addRefreshToken(response, result.refreshToken(), result.refreshTokenTtlSeconds());
-        return GlobalResponse.success(HttpStatus.OK.value(), new LoginResponse(result.accessToken(), result.nickname()));
+        return GlobalResponse.success(HttpStatus.OK.value(), LoginResponse.from(result));
     }
 
     @PostMapping("/refresh")
     public GlobalResponse<LoginResponse> reissue(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
         LoginResult result = memberService.reissue(refreshToken);
         CookieUtils.addRefreshToken(response, result.refreshToken(), result.refreshTokenTtlSeconds());
-        return GlobalResponse.success(HttpStatus.OK.value(), new LoginResponse(result.accessToken(), result.nickname()));
+        return GlobalResponse.success(HttpStatus.OK.value(), LoginResponse.from(result));
     }
 
     @PostMapping("/logout")
