@@ -45,9 +45,10 @@ public class MemberService {
 
         String accessToken = jwtProvider.generateAccessToken(member.id(), member.role().name());
         String refreshToken = jwtProvider.generateRefreshToken(member.id());
+        long refreshTokenTtlSeconds = jwtProvider.getRefreshTokenTtlSeconds();
         refreshTokenRepository.save(member.id(), refreshToken, jwtProvider.getRefreshTokenTtlSeconds());
 
-        return LoginResponse.from(accessToken, refreshToken, member.nickname());
+        return LoginResponse.from(accessToken, refreshToken, member.nickname(), refreshTokenTtlSeconds);
     }
 
     public MemberResponse getMe(Long memberId) {
@@ -77,10 +78,15 @@ public class MemberService {
 
         String newAccessToken = jwtProvider.generateAccessToken(member.id(), member.role().name());
         String newRefreshToken = jwtProvider.generateRefreshToken(member.id());
+        long newRefreshTokenTtlSeconds = jwtProvider.getRefreshTokenTtlSeconds();
 
         refreshTokenRepository.deleteByToken(refreshToken);
-        refreshTokenRepository.save(member.id(), newRefreshToken, jwtProvider.getRefreshTokenTtlSeconds());
+        refreshTokenRepository.save(member.id(), newRefreshToken, newRefreshTokenTtlSeconds);
 
-        return LoginResponse.from(newAccessToken, newRefreshToken, member.nickname());
+        return LoginResponse.from(newAccessToken, newRefreshToken, member.nickname(), newRefreshTokenTtlSeconds);
+    }
+
+    public void logout(String refreshToken) {
+        refreshTokenRepository.deleteByToken(refreshToken);
     }
 }
