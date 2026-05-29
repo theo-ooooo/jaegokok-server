@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -35,6 +36,7 @@ public class ProductQueryRepositoryImpl implements ProductQueryRepository {
                 builder.and(product.category.eq(condition.category()));
             }
             if (Boolean.TRUE.equals(condition.lowStock())) {
+                // TODO: Inventory 도메인 연동 후 currentStock < minStockLevel 조건으로 교체
                 builder.and(product.minStockLevel.gt(0));
             }
         }
@@ -42,15 +44,18 @@ public class ProductQueryRepositoryImpl implements ProductQueryRepository {
         List<ProductEntity> content = queryFactory
                 .selectFrom(product)
                 .where(builder)
+                .orderBy(product.createdAt.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        long total = queryFactory
-                .select(product.count())
-                .from(product)
-                .where(builder)
-                .fetchOne();
+        long total = Optional.ofNullable(
+                queryFactory
+                        .select(product.count())
+                        .from(product)
+                        .where(builder)
+                        .fetchOne()
+        ).orElse(0L);
 
         return new PageImpl<>(content, pageable, total);
     }

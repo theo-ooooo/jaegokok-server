@@ -35,7 +35,7 @@ public class ProductService {
     @Transactional
     public ProductResponse create(Long memberId, CreateProductRequest request) {
         Workspace workspace = getOwnerWorkspace(memberId);
-        int limit = PLAN_LIMITS.get(workspace.plan());
+        int limit = PLAN_LIMITS.getOrDefault(workspace.plan(), Integer.MAX_VALUE);
         if (productRepository.countByWorkspaceId(workspace.id()) >= limit) {
             throw new CustomException(ErrorCode.PRODUCT_LIMIT_EXCEEDED);
         }

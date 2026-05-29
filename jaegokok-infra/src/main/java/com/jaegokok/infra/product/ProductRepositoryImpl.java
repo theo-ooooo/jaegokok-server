@@ -77,11 +77,6 @@ public class ProductRepositoryImpl implements ProductRepository {
         productJpaRepository.deleteById(id);
     }
 
-    @Override
-    public boolean existsById(Long id) {
-        return productJpaRepository.existsById(id);
-    }
-
     private Product toProduct(ProductEntity e) {
         return new Product(
                 e.getId(),

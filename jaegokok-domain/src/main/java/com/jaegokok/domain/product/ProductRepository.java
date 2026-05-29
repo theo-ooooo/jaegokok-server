@@ -15,5 +15,4 @@ public interface ProductRepository {
     long countByWorkspaceId(Long workspaceId);
     Product update(Long productId, UpdateProductRequest request);
     void deleteById(Long id);
-    boolean existsById(Long id);
 }
