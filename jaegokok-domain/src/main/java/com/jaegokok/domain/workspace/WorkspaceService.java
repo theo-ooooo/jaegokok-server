@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -64,8 +66,12 @@ public class WorkspaceService {
     @Transactional(readOnly = true)
     public List<WorkspaceMemberResponse> getMembers(Long workspaceId, Long requesterId) {
         checkOwner(workspaceId, requesterId);
-        return workspaceMemberRepository.findByWorkspaceId(workspaceId).stream()
-                .map(wm -> WorkspaceMemberResponse.of(wm, memberRepository.findById(wm.memberId())))
+        List<WorkspaceMember> members = workspaceMemberRepository.findByWorkspaceId(workspaceId);
+        List<Long> memberIds = members.stream().map(WorkspaceMember::memberId).toList();
+        Map<Long, Member> memberMap = memberRepository.findAllByIds(memberIds).stream()
+                .collect(Collectors.toMap(Member::id, m -> m));
+        return members.stream()
+                .map(wm -> WorkspaceMemberResponse.of(wm, memberMap.get(wm.memberId())))
                 .toList();
     }
 

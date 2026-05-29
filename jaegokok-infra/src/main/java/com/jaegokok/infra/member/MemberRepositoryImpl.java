@@ -9,6 +9,7 @@ import com.jaegokok.domain.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -56,6 +57,13 @@ public class MemberRepositoryImpl implements MemberRepository {
         return memberJpaRepository.findByEmail(email)
                 .map(MemberEntity::getPassword)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    @Override
+    public List<Member> findAllByIds(List<Long> ids) {
+        return memberJpaRepository.findAllByIdIn(ids).stream()
+                .map(this::toMember)
+                .toList();
     }
 
     private Member toMember(MemberEntity entity) {
