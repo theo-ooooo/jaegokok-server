@@ -47,7 +47,7 @@ public class WorkspaceEntity extends BaseEntity {
     private String phone;
 
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<WorkspaceLogoEntity> logos = new ArrayList<>();
+    private List<WorkspaceImageEntity> images = new ArrayList<>();
 
     @Builder
     private WorkspaceEntity(MemberEntity owner, String name, String description, WorkspacePlan plan) {

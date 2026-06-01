@@ -14,7 +14,7 @@ public record WorkspaceResponse(
         String businessNumber,
         String address,
         String phone,
-        WorkspaceLogoResponse logo,
+        WorkspaceImageResponse logo,
         LocalDateTime createdAt
 ) {
     public static WorkspaceResponse from(Workspace workspace) {
@@ -27,7 +27,7 @@ public record WorkspaceResponse(
                 workspace.businessNumber(),
                 workspace.address(),
                 workspace.phone(),
-                workspace.logo() != null ? WorkspaceLogoResponse.from(workspace.logo()) : null,
+                workspace.logo() != null ? WorkspaceImageResponse.from(workspace.logo()) : null,
                 workspace.createdAt()
         );
     }

@@ -4,10 +4,10 @@ import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.core.member.MemberEntity;
 import com.jaegokok.core.workspace.WorkspaceEntity;
-import com.jaegokok.core.workspace.WorkspaceLogoEntity;
+import com.jaegokok.core.workspace.WorkspaceImageEntity;
 import com.jaegokok.core.workspace.WorkspacePlan;
 import com.jaegokok.domain.workspace.Workspace;
-import com.jaegokok.domain.workspace.WorkspaceLogo;
+import com.jaegokok.domain.workspace.WorkspaceImage;
 import com.jaegokok.domain.workspace.WorkspaceRepository;
 import com.jaegokok.infra.member.MemberJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -61,8 +61,8 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
     }
 
     private Workspace toWorkspace(WorkspaceEntity e) {
-        WorkspaceLogo logo = e.getLogos().isEmpty() ? null
-                : toWorkspaceLogo(e.getLogos().get(0));
+        WorkspaceImage logo = e.getImages().isEmpty() ? null
+                : toWorkspaceImage(e.getImages().get(0));
         return new Workspace(
                 e.getId(),
                 e.getOwner().getId(),
@@ -78,8 +78,8 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
         );
     }
 
-    private WorkspaceLogo toWorkspaceLogo(WorkspaceLogoEntity e) {
-        return new WorkspaceLogo(e.getId(), e.getWorkspace().getId(), e.getOriginalPath(), e.getWebpPath(), e.getBucket(), e.getCreatedAt());
+    private WorkspaceImage toWorkspaceImage(WorkspaceImageEntity e) {
+        return new WorkspaceImage(e.getId(), e.getWorkspace().getId(), e.getOriginalPath(), e.getWebpPath(), e.getBucket(), e.getCreatedAt());
     }
 
 }

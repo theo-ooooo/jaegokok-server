@@ -8,10 +8,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "workspace_logos")
+@Table(name = "workspace_images")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class WorkspaceLogoEntity extends BaseEntity {
+public class WorkspaceImageEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,15 +31,15 @@ public class WorkspaceLogoEntity extends BaseEntity {
     private String bucket;
 
     @Builder
-    private WorkspaceLogoEntity(WorkspaceEntity workspace, String originalPath, String webpPath, String bucket) {
+    private WorkspaceImageEntity(WorkspaceEntity workspace, String originalPath, String webpPath, String bucket) {
         this.workspace = workspace;
         this.originalPath = originalPath;
         this.webpPath = webpPath;
         this.bucket = bucket;
     }
 
-    public static WorkspaceLogoEntity of(WorkspaceEntity workspace, String originalPath, String webpPath, String bucket) {
-        return WorkspaceLogoEntity.builder()
+    public static WorkspaceImageEntity of(WorkspaceEntity workspace, String originalPath, String webpPath, String bucket) {
+        return WorkspaceImageEntity.builder()
                 .workspace(workspace)
                 .originalPath(originalPath)
                 .webpPath(webpPath)

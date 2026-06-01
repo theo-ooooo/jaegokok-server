@@ -2,7 +2,7 @@ package com.jaegokok.domain.workspace;
 
 import java.time.LocalDateTime;
 
-public record WorkspaceLogo(
+public record WorkspaceImage(
         Long id,
         Long workspaceId,
         String originalPath,

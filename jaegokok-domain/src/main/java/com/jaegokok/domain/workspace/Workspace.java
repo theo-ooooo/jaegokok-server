@@ -14,6 +14,6 @@ public record Workspace(
         String businessNumber,
         String address,
         String phone,
-        WorkspaceLogo logo,
+        WorkspaceImage logo,
         LocalDateTime createdAt
 ) {}

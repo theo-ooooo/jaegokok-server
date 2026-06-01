@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class WorkspaceService {
 
     private final WorkspaceRepository workspaceRepository;
-    private final WorkspaceLogoRepository workspaceLogoRepository;
+    private final WorkspaceImageRepository workspaceImageRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final FileUploadPort fileUploadPort;
 
@@ -42,8 +42,8 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findByOwnerId(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
         String originalPath = fileUploadPort.upload("logos/" + workspace.id() + "/original", originalFilename, content, contentType);
-        workspaceLogoRepository.deleteByWorkspaceId(workspace.id());
-        workspaceLogoRepository.save(workspace.id(), originalPath, null, fileUploadPort.getBucket());
+        workspaceImageRepository.deleteByWorkspaceId(workspace.id());
+        workspaceImageRepository.save(workspace.id(), originalPath, null, fileUploadPort.getBucket());
         return WorkspaceResponse.from(workspaceRepository.findByOwnerId(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND)));
     }
