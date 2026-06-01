@@ -32,7 +32,11 @@ public enum ErrorCode {
     PRODUCT_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "플랜의 상품 등록 한도를 초과했습니다."),
 
     // Inventory
-    INSUFFICIENT_STOCK(HttpStatus.BAD_REQUEST, "재고가 부족합니다.");
+    INSUFFICIENT_STOCK(HttpStatus.BAD_REQUEST, "재고가 부족합니다."),
+
+    // File
+    INVALID_FILE_TYPE(HttpStatus.BAD_REQUEST, "이미지 파일(JPEG, PNG, WEBP)만 업로드 가능합니다."),
+    FILE_TOO_LARGE(HttpStatus.BAD_REQUEST, "파일 크기는 5MB를 초과할 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

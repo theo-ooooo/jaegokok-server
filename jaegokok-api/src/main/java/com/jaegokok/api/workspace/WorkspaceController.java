@@ -1,6 +1,7 @@
 package com.jaegokok.api.workspace;
 
 import com.jaegokok.api.security.UserPrincipal;
+import com.jaegokok.api.util.FileValidator;
 import com.jaegokok.common.response.GlobalResponse;
 import com.jaegokok.domain.workspace.WorkspaceService;
 import com.jaegokok.domain.workspace.dto.CreateWorkspaceRequest;
@@ -44,7 +45,8 @@ public class WorkspaceController {
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestPart MultipartFile file
     ) throws IOException {
+        FileValidator.validateImage(file);
         return GlobalResponse.success(HttpStatus.OK.value(),
-                workspaceService.uploadLogo(principal.getId(), file.getOriginalFilename(), file.getBytes(), file.getContentType()));
+                workspaceService.uploadLogo(principal.getId(), FileValidator.safeFilename(file), file.getBytes(), file.getContentType()));
     }
 }
