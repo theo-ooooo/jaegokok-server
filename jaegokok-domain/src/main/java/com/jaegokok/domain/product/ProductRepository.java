@@ -19,5 +19,4 @@ public interface ProductRepository {
     void deleteById(Long id);
     void adjustStock(Long productId, int delta);
     List<Product> findAllByIds(List<Long> ids);
-    Product updateImageUrl(Long productId, String imageUrl);
 }

@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -51,8 +53,8 @@ public class ProductEntity extends BaseEntity {
     @Column(name = "qr_code", nullable = false, unique = true, length = 36)
     private String qrCode;
 
-    @Column(length = 500)
-    private String imageUrl;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ProductImageEntity> images = new ArrayList<>();
 
     @Builder
     private ProductEntity(WorkspaceEntity workspace, String name, String sku, String description,
@@ -100,7 +102,4 @@ public class ProductEntity extends BaseEntity {
         if (minStockLevel != null) this.minStockLevel = minStockLevel;
     }
 
-    public void updateImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 }

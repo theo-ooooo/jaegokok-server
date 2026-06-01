@@ -2,6 +2,7 @@ package com.jaegokok.domain.product;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record Product(
         Long id,
@@ -15,6 +16,6 @@ public record Product(
         int minStockLevel,
         int currentStock,
         String qrCode,
-        String imageUrl,
+        List<ProductImage> images,
         LocalDateTime createdAt
 ) {}

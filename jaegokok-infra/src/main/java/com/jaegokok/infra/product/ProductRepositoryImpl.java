@@ -4,6 +4,7 @@ import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.core.product.ProductEntity;
 import com.jaegokok.domain.product.Product;
+import com.jaegokok.domain.product.ProductImage;
 import com.jaegokok.domain.product.ProductRepository;
 import com.jaegokok.domain.product.dto.CreateProductRequest;
 import com.jaegokok.domain.product.dto.ProductSearchCondition;
@@ -98,15 +99,10 @@ public class ProductRepositoryImpl implements ProductRepository {
         productJpaRepository.adjustStock(productId, delta);
     }
 
-    @Override
-    public Product updateImageUrl(Long productId, String imageUrl) {
-        ProductEntity entity = productJpaRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        entity.updateImageUrl(imageUrl);
-        return toProduct(entity);
-    }
-
     private Product toProduct(ProductEntity e) {
+        List<ProductImage> images = e.getImages().stream()
+                .map(img -> new ProductImage(img.getId(), e.getId(), img.getOriginalPath(), img.getWebpPath(), img.getBucket(), img.getCreatedAt()))
+                .toList();
         return new Product(
                 e.getId(),
                 e.getWorkspace().getId(),
@@ -119,7 +115,7 @@ public class ProductRepositoryImpl implements ProductRepository {
                 e.getMinStockLevel(),
                 e.getCurrentStock(),
                 e.getQrCode(),
-                e.getImageUrl(),
+                images,
                 e.getCreatedAt()
         );
     }

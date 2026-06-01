@@ -32,6 +32,7 @@ public class ProductService {
     );
 
     private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
     private final WorkspaceRepository workspaceRepository;
     private final QrCodePort qrCodePort;
     private final FileUploadPort fileUploadPort;
@@ -120,8 +121,11 @@ public class ProductService {
         if (!product.workspaceId().equals(workspace.id())) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
-        String imageUrl = fileUploadPort.upload("products", originalFilename, content, contentType);
-        return ProductResponse.from(productRepository.updateImageUrl(productId, imageUrl));
+        String originalPath = fileUploadPort.upload("products/" + productId + "/original", originalFilename, content, contentType);
+        productImageRepository.deleteByProductId(productId);
+        productImageRepository.save(productId, originalPath, null, fileUploadPort.getBucket());
+        return ProductResponse.from(productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)));
     }
 
     private Workspace getOwnerWorkspace(Long memberId) {
