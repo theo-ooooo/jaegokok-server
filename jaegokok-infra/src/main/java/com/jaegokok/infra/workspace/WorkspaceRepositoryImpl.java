@@ -45,6 +45,11 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
         return workspaceJpaRepository.existsByOwner_Id(ownerId);
     }
 
+    @Override
+    public Optional<Workspace> findByOwnerId(Long ownerId) {
+        return workspaceJpaRepository.findByOwner_Id(ownerId).map(this::toWorkspace);
+    }
+
     private Workspace toWorkspace(WorkspaceEntity e) {
         return new Workspace(
                 e.getId(),

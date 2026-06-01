@@ -10,4 +10,5 @@ public interface WorkspaceMemberRepository {
     List<WorkspaceMember> findByWorkspaceId(Long workspaceId);
     Optional<WorkspaceMember> findByWorkspaceIdAndMemberId(Long workspaceId, Long memberId);
     void deleteById(Long id);
+    boolean existsByWorkspaceIdAndMemberId(Long workspaceId, Long memberId);
 }

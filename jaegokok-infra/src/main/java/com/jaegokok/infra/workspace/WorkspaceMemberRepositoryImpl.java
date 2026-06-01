@@ -47,6 +47,11 @@ public class WorkspaceMemberRepositoryImpl implements WorkspaceMemberRepository 
         workspaceMemberJpaRepository.deleteById(id);
     }
 
+    @Override
+    public boolean existsByWorkspaceIdAndMemberId(Long workspaceId, Long memberId) {
+        return workspaceMemberJpaRepository.existsByWorkspace_IdAndMember_Id(workspaceId, memberId);
+    }
+
     private WorkspaceMember toWorkspaceMember(WorkspaceMemberEntity entity) {
         return new WorkspaceMember(
                 entity.getId(),

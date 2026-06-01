@@ -45,12 +45,15 @@ public class ProductEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "int default 0")
     private int minStockLevel;
 
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private int currentStock;
+
     @Column(name = "qr_code", nullable = false, unique = true, length = 36)
     private String qrCode;
 
     @Builder
     private ProductEntity(WorkspaceEntity workspace, String name, String sku, String description,
-                          BigDecimal price, String unit, String category, int minStockLevel, String qrCode) {
+                          BigDecimal price, String unit, String category, int minStockLevel, int currentStock, String qrCode) {
         this.workspace = workspace;
         this.name = name;
         this.sku = sku;
@@ -59,11 +62,12 @@ public class ProductEntity extends BaseEntity {
         this.unit = unit;
         this.category = category;
         this.minStockLevel = minStockLevel;
+        this.currentStock = currentStock;
         this.qrCode = qrCode;
     }
 
     public static ProductEntity from(WorkspaceEntity workspace, String name, String sku, String description,
-                                     BigDecimal price, String unit, String category, int minStockLevel, String qrCode) {
+                                     BigDecimal price, String unit, String category, int minStockLevel, int currentStock, String qrCode) {
         return ProductEntity.builder()
                 .workspace(workspace)
                 .name(name)
@@ -73,8 +77,13 @@ public class ProductEntity extends BaseEntity {
                 .unit(unit)
                 .category(category)
                 .minStockLevel(minStockLevel)
+                .currentStock(currentStock)
                 .qrCode(qrCode)
                 .build();
+    }
+
+    public void adjustStock(int delta) {
+        this.currentStock += delta;
     }
 
     public void update(String name, String sku, String description, BigDecimal price,

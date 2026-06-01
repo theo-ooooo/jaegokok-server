@@ -10,4 +10,5 @@ public interface WorkspaceRepository {
     Optional<Workspace> findById(Long id);
     List<Workspace> findAllByMemberId(Long memberId);
     boolean existsByOwnerId(Long ownerId);
+    Optional<Workspace> findByOwnerId(Long ownerId);
 }

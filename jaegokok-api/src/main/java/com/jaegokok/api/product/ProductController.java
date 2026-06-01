@@ -2,6 +2,8 @@ package com.jaegokok.api.product;
 
 import com.jaegokok.api.security.UserPrincipal;
 import com.jaegokok.common.response.GlobalResponse;
+import com.jaegokok.domain.inventory.ScanService;
+import com.jaegokok.domain.inventory.dto.StockResponse;
 import com.jaegokok.domain.product.ProductService;
 import com.jaegokok.domain.product.dto.CreateProductRequest;
 import com.jaegokok.domain.product.dto.ProductResponse;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class ProductController {
 
     private final ProductService productService;
+    private final ScanService scanService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -68,5 +71,13 @@ public class ProductController {
     ) {
         productService.delete(principal.getId(), id);
         return GlobalResponse.success(HttpStatus.OK.value(), null);
+    }
+
+    @GetMapping("/{id}/stock")
+    public GlobalResponse<StockResponse> getStock(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id
+    ) {
+        return GlobalResponse.success(HttpStatus.OK.value(), scanService.getStock(id, principal.getId()));
     }
 }

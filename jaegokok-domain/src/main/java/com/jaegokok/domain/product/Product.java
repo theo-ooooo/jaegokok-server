@@ -13,6 +13,7 @@ public record Product(
         String unit,
         String category,
         int minStockLevel,
+        int currentStock,
         String qrCode,
         LocalDateTime createdAt
 ) {}

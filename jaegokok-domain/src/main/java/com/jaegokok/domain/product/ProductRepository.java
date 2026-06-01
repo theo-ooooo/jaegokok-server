@@ -15,4 +15,6 @@ public interface ProductRepository {
     long countByWorkspaceId(Long workspaceId);
     Product update(Long productId, UpdateProductRequest request);
     void deleteById(Long id);
+    Optional<Product> findByQrCode(String qrCode);
+    void adjustStock(Long productId, int delta);
 }
