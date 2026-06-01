@@ -96,6 +96,9 @@ public class ProductService {
     public byte[] downloadBulkQrPdf(Long memberId, List<Long> productIds) {
         Workspace workspace = getOwnerWorkspace(memberId);
         List<Product> products = productRepository.findAllByIds(productIds);
+        if (products.size() != productIds.stream().distinct().count()) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
         products.forEach(product -> {
             if (!product.workspaceId().equals(workspace.id())) {
                 throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
