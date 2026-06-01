@@ -15,6 +15,7 @@ import com.jaegokok.domain.workspace.dto.InviteMemberResponse;
 import com.jaegokok.domain.workspace.dto.UpdateWorkspaceProfileRequest;
 import com.jaegokok.domain.workspace.dto.WorkspaceResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,8 +51,12 @@ public class WorkspaceService {
         if (workspaceMemberRepository.existsByWorkspaceIdAndMemberId(request.workspaceId(), invitee.id())) {
             throw new CustomException(ErrorCode.WORKSPACE_MEMBER_ALREADY_EXISTS);
         }
-        WorkspaceMember workspaceMember = workspaceMemberRepository.save(request.workspaceId(), invitee.id(), WorkspaceMemberRole.EMPLOYEE);
-        return InviteMemberResponse.from(workspaceMember);
+        try {
+            WorkspaceMember workspaceMember = workspaceMemberRepository.save(request.workspaceId(), invitee.id(), WorkspaceMemberRole.EMPLOYEE);
+            return InviteMemberResponse.from(workspaceMember);
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomException(ErrorCode.WORKSPACE_MEMBER_ALREADY_EXISTS);
+        }
     }
 
     @Transactional
