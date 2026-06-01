@@ -26,6 +26,7 @@ public class DashboardService {
 
     public DashboardResponse getDashboard(Long memberId) {
         Long workspaceId = workspaceRepository.findByOwnerId(memberId)
+                .or(() -> workspaceRepository.findAllByMemberId(memberId).stream().findFirst())
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND))
                 .id();
 
