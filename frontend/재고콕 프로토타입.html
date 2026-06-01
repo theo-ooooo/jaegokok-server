@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재고콕 — 인터랙티브 프로토타입</title>
+<link rel="stylesheet" href="assets/jaegokkok.css">
+<style>
+  body { background: var(--bg-alt); margin: 0; }
+  .page { padding: 40px var(--gutter) 80px; }
+  .head { max-width: 1100px; margin: 0 auto 36px; }
+  .head .ey { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .head h1 { margin: 0 0 10px; }
+  .head p { max-width: 64ch; margin: 0; }
+  .topnav { position: sticky; top: 0; z-index: 30; background: rgba(247,248,250,.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+  .topnav .inner { max-width: 1100px; margin: 0 auto; padding: 13px var(--gutter); display: flex; align-items: center; gap: 18px; }
+  .topnav a { font-size: 13px; color: var(--text-secondary); text-decoration: none; font-weight: 600; }
+  .topnav a:hover { color: var(--brand); }
+  .topnav .home { margin-left: auto; }
+
+  /* device switch */
+  .switch { display: inline-flex; background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-pill); padding: 4px; gap: 4px; box-shadow: var(--shadow-sm); }
+  .switch button { display: inline-flex; align-items: center; gap: 7px; border: 0; cursor: pointer; padding: 9px 18px; border-radius: var(--r-pill); background: transparent; color: var(--text-secondary); font-weight: 600; font-size: 13.5px; font-family: var(--font-sans); transition: all .18s var(--ease-out); }
+  .switch button.on { background: var(--brand); color: #fff; }
+  .switch button:not(.on):hover { color: var(--text-primary); }
+
+  /* fit-to-width stage */
+  .fit { width: 100%; overflow: hidden; display: flex; justify-content: center; align-items: flex-start; }
+  .stage { display: flex; gap: 56px; align-items: flex-start; transform-origin: top center; transition: gap .3s var(--ease-out); }
+  .stage.mode-desk .wrap-mob { display: none; }
+  .stage.mode-mob .wrap-desk { display: none; }
+
+  .frame-wrap { display: flex; flex-direction: column; gap: 14px; }
+  .frame-label { display: flex; align-items: center; gap: 10px; }
+  .frame-label .badge { font-size: 11px; }
+
+  /* desktop browser frame */
+  .deskframe { width: 1000px; height: 720px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+    box-shadow: var(--shadow-pop); background: #fff; display: flex; flex-direction: column; }
+  .chrome { height: 42px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-bottom: 1px solid var(--border); background: var(--bg-alt); }
+  .lights { display: flex; gap: 7px; }
+  .lights i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+  .urlbar { flex: 1; max-width: 340px; height: 26px; border-radius: var(--r-pill); background: #fff; border: 1px solid var(--border);
+    display: flex; align-items: center; gap: 7px; padding: 0 12px; font-family: var(--font-mono); font-size: 11.5px; color: var(--text-tertiary); }
+  .app-area { flex: 1; min-height: 0; }
+  .app-area > div { height: 100%; }
+
+  /* phone frame */
+  .phoneframe { width: 384px; height: 800px; border-radius: 46px; border: 11px solid #0B0D12; overflow: hidden;
+    box-shadow: var(--shadow-pop); background: #fff; display: flex; flex-direction: column; position: relative; }
+  .statusbar { flex: none; height: 46px; display: flex; align-items: center; justify-content: space-between; padding: 0 26px 0 30px; background: var(--bg); font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .statusbar .icons { display: flex; align-items: center; gap: 6px; }
+  .notch { position: absolute; top: 13px; left: 50%; transform: translateX(-50%); width: 108px; height: 26px; background: #0B0D12; border-radius: 999px; z-index: 5; }
+  .phone-app { flex: 1; min-height: 0; }
+  .phone-app > div { height: 100%; }
+
+  /* animations */
+  @keyframes jk-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes jk-pop { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes jk-toast { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes jk-scan { 0% { top: 24%; } 50% { top: 74%; } 100% { top: 24%; } }
+  .jk-scanline { position: absolute; left: 30px; right: 30px; height: 3px; border-radius: 3px; box-shadow: 0 0 14px 2px currentColor; animation: jk-scan 1.3s var(--ease-io) infinite; }
+  @keyframes jk-spin { to { transform: rotate(360deg); } }
+  .jk-spin { animation: jk-spin .9s linear infinite; }
+  @keyframes jk-check { 0% { transform: scale(.5); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+  .jk-checkpop { animation: jk-check .42s var(--ease-out); }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="inner">
+    <span class="t-label">재고콕 · PROTOTYPE</span>
+    <a href="#">데스크탑 + 모바일 반응형 · 클릭 가능</a>
+    <a class="home" href="index.html">← 전체 보기</a>
+  </div>
+</nav>
+
+<div class="page">
+  <header class="head">
+    <div class="ey"><span class="t-label">Interactive Prototype</span><span class="t-mono">실제 동작 · 화면 전환 · 상태 저장</span></div>
+    <h1 class="t-h1">하나의 반응형 앱, 두 가지 화면</h1>
+    <p class="t-body">사장님은 데스크탑 관리자로, 직원은 매장에서 모바일 앱으로 — 같은 서비스가 화면 폭에 맞춰 반응합니다. <strong style="color:var(--text-primary)">둘 다 실제로 클릭됩니다.</strong> 메뉴로 화면을 전환하고, 입출고에서 스캔하면 재고가 변하며 대시보드·상품목록에 반영됩니다.</p>
+    <div class="switch" id="switch" style="margin-top:26px;">
+      <button data-mode="both" class="on"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="13" height="10" rx="1"/><rect x="17" y="7" width="5" height="13" rx="1"/></svg>나란히 비교</button>
+      <button data-mode="desk"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="13" rx="1"/><path d="M8 21h8M12 17v4"/></svg>데스크탑</button>
+      <button data-mode="mob"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>모바일</button>
+    </div>
+  </header>
+
+  <div class="fit" id="fit">
+    <div class="stage mode-both" id="stage">
+      <!-- DESKTOP -->
+      <div class="frame-wrap wrap-desk">
+        <div class="frame-label">
+          <span class="badge badge--brand">DESKTOP</span>
+          <span class="t-body" style="margin:0; font-size:13px;">사장님 · 관리자 (1000×720)</span>
+        </div>
+        <div class="deskframe">
+          <div class="chrome">
+            <span class="lights"><i style="background:#FF5F57"></i><i style="background:#FEBC2E"></i><i style="background:#28C840"></i></span>
+            <span class="urlbar"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="1.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>app.jaegokkok.kr</span>
+          </div>
+          <div class="app-area" id="desk"></div>
+        </div>
+      </div>
+
+      <!-- MOBILE -->
+      <div class="frame-wrap wrap-mob">
+        <div class="frame-label">
+          <span class="badge badge--brand">MOBILE</span>
+          <span class="t-body" style="margin:0; font-size:13px;">직원 · 스캔 (384×800)</span>
+        </div>
+        <div class="phoneframe">
+          <div class="notch"></div>
+          <div class="statusbar">
+            <span>9:41</span>
+            <span class="icons">
+              <svg width="17" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".35"/></svg>
+              <svg width="22" height="12" viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="1.5" width="19" height="9" rx="2.5"/><rect x="2.6" y="3.1" width="13" height="5.8" rx="1.2" fill="currentColor" stroke="none"/><rect x="21.2" y="4" width="1.8" height="4" rx="1" fill="currentColor" stroke="none"/></svg>
+            </span>
+          </div>
+          <div class="phone-app" id="mob"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="app/icons.jsx"></script>
+<script type="text/babel" src="app/data.jsx"></script>
+<script type="text/babel" src="app/screens.jsx"></script>
+<script type="text/babel" src="app/screens2.jsx"></script>
+<script type="text/babel" src="app/shell.jsx"></script>
+<script type="text/babel" data-presets="react">
+  const { createRoot } = ReactDOM;
+  createRoot(document.getElementById("desk")).render(<App mode="desktop" />);
+  createRoot(document.getElementById("mob")).render(<App mode="mobile" />);
+</script>
+<script>
+  (function () {
+    const fit = document.getElementById("fit");
+    const stage = document.getElementById("stage");
+    const sw = document.getElementById("switch");
+    function fitStage() {
+      stage.style.transform = "none";
+      fit.style.height = "auto";
+      const w = stage.offsetWidth, h = stage.offsetHeight;
+      if (!w) return;
+      const scale = Math.min(1, (fit.clientWidth) / w);
+      stage.style.transform = "scale(" + scale + ")";
+      fit.style.height = Math.ceil(h * scale) + "px";
+    }
+    sw.addEventListener("click", function (e) {
+      const btn = e.target.closest("button[data-mode]");
+      if (!btn) return;
+      sw.querySelectorAll("button").forEach(b => b.classList.toggle("on", b === btn));
+      stage.className = "stage mode-" + btn.dataset.mode;
+      requestAnimationFrame(fitStage);
+    });
+    window.addEventListener("resize", fitStage);
+    fitStage();
+    // re-fit a few times as fonts/React settle
+    setTimeout(fitStage, 120);
+    setTimeout(fitStage, 500);
+  })();
+</script>
+</body>
+</html>

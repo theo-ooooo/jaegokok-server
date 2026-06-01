@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재고콕 — 풀 플로우 프로토타입</title>
+<link rel="stylesheet" href="assets/jaegokkok.css">
+<style>
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg-alt); display: flex; flex-direction: column; }
+
+  .topnav { flex: none; background: rgba(242,238,230,.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+  .topnav .inner { max-width: 1100px; margin: 0 auto; padding: 13px var(--gutter); display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .topnav a { font-size: 13px; color: var(--text-secondary); text-decoration: none; font-weight: 600; }
+  .topnav a:hover { color: var(--brand); }
+  .topnav .home { margin-left: auto; }
+
+  .stagewrap { flex: 1; display: flex; align-items: center; justify-content: center; gap: 44px; padding: 28px var(--gutter); min-height: 0; overflow: hidden; }
+  @media (max-width: 720px){ .side { display: none; } .stagewrap { padding: 16px; } }
+
+  .phonebox { flex: none; display: flex; align-items: center; justify-content: center; }
+
+  .side { max-width: 320px; }
+  .side .ey { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .side h2 { font-size: 26px; font-weight: 900; letter-spacing: -.03em; line-height: 1.12; margin: 0 0 14px; }
+  .side p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin: 0 0 22px; }
+  .flowsteps { display: grid; gap: 2px; }
+  .fstep { display: flex; align-items: center; gap: 13px; padding: 11px 14px; border-radius: var(--r-2); font-size: 14px; color: var(--text-secondary); }
+  .fstep .n { width: 26px; height: 26px; flex: none; border-radius: 50%; background: var(--bg-card); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: var(--text-tertiary); }
+  .fstep.on { background: var(--bg-tint); color: var(--brand); font-weight: 700; }
+  .fstep.on .n { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .resetbtn { margin-top: 22px; }
+
+  .phoneframe { width: 380px; height: 800px; border-radius: 46px; border: 11px solid #1C1A17; overflow: hidden;
+    box-shadow: var(--shadow-pop); background: #fff; display: flex; flex-direction: column; position: relative; transform-origin: center center; }
+  .notch { position: absolute; top: 13px; left: 50%; transform: translateX(-50%); width: 108px; height: 26px; background: #1C1A17; border-radius: 999px; z-index: 50; }
+  .statusbar { flex: none; height: 46px; display: flex; align-items: center; justify-content: space-between; padding: 0 26px 0 30px; background: transparent; font-size: 13px; font-weight: 700; color: var(--text-primary); position: relative; z-index: 20; }
+  .statusbar .icons { display: flex; align-items: center; gap: 6px; }
+  .app-root { flex: 1; min-height: 0; overflow: hidden; }
+  .app-root > div { height: 100%; overflow-y: auto; }
+
+  @keyframes jk-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes jk-pop { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+  @keyframes jk-toast { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes jk-scan { 0% { top: 24%; } 50% { top: 74%; } 100% { top: 24%; } }
+  .jk-scanline { position: absolute; left: 30px; right: 30px; height: 3px; border-radius: 3px; box-shadow: 0 0 14px 2px currentColor; animation: jk-scan 1.3s var(--ease-io) infinite; }
+  @keyframes jk-spin { to { transform: rotate(360deg); } }
+  .jk-spin { animation: jk-spin .9s linear infinite; }
+  @keyframes jk-check { 0% { transform: scale(.5); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); } }
+  .jk-checkpop { animation: jk-check .42s var(--ease-out); }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="inner">
+    <span class="t-label">재고콕 · FULL FLOW</span>
+    <a href="#">회원가입 → 사업장 등록 → 상품·QR → 직원 → 대시보드</a>
+    <a class="home" href="index.html">← 전체 보기</a>
+  </div>
+</nav>
+
+<div class="stagewrap">
+  <aside class="side">
+    <div class="ey">
+      <svg width="34" height="34" viewBox="0 0 64 64"><rect x="7" y="7" width="50" height="50" rx="13" fill="var(--brand)"/><path d="M19 33 l9 9 l17 -19" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span style="font-weight:900; font-size:20px; letter-spacing:-.02em;">재고콕<span style="color:var(--brand)">.</span></span>
+    </div>
+    <h2>가입부터 첫 입출고까지,<br>끊김 없이.</h2>
+    <p>실제로 클릭되는 전체 여정입니다. 회원가입하고 매장을 등록하면, 등록한 상품이 그대로 대시보드와 상품 목록에 나타납니다.</p>
+    <div class="flowsteps" id="flowsteps">
+      <div class="fstep" data-phase="auth"><span class="n">1</span>회원가입 / 로그인</div>
+      <div class="fstep" data-phase="onboarding"><span class="n">2</span>사업장 · 상품 · 직원 등록</div>
+      <div class="fstep" data-phase="app"><span class="n">3</span>대시보드 · 입출고 사용</div>
+    </div>
+    <button class="btn btn--ghost btn--sm resetbtn" id="resetBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>처음부터 다시</button>
+  </aside>
+
+  <div class="phonebox" id="phonebox">
+    <div class="phoneframe" id="phone">
+    <div class="notch"></div>
+    <div class="statusbar">
+      <span>9:41</span>
+      <span class="icons">
+        <svg width="17" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".35"/></svg>
+        <svg width="22" height="12" viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="1.5" width="19" height="9" rx="2.5"/><rect x="2.6" y="3.1" width="13" height="5.8" rx="1.2" fill="currentColor" stroke="none"/><rect x="21.2" y="4" width="1.8" height="4" rx="1" fill="currentColor" stroke="none"/></svg>
+      </span>
+    </div>
+    <div class="app-root" id="root"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="app/icons.jsx"></script>
+<script type="text/babel" src="app/data.jsx"></script>
+<script type="text/babel" src="app/screens.jsx"></script>
+<script type="text/babel" src="app/screens2.jsx"></script>
+<script type="text/babel" src="app/shell.jsx"></script>
+<script type="text/babel" src="app/flow.jsx"></script>
+<script type="text/babel" data-presets="react">
+  const { createRoot } = ReactDOM;
+  function Host() {
+    const [key, setKey] = React.useState(0);
+    window.__resetFlow = () => setKey(k => k + 1);
+    return <FlowRoot key={key} />;
+  }
+  createRoot(document.getElementById("root")).render(<Host />);
+
+  function paintRail(phase) {
+    document.querySelectorAll("#flowsteps .fstep").forEach(el => {
+      el.classList.toggle("on", el.dataset.phase === phase);
+    });
+  }
+  setInterval(() => { if (window.__currentPhase) paintRail(window.__currentPhase); }, 250);
+
+  document.getElementById("resetBtn").addEventListener("click", () => { window.__resetFlow && window.__resetFlow(); });
+
+  // fit phone to available height
+  const phone = document.getElementById("phone");
+  const phonebox = document.getElementById("phonebox");
+  const wrap = document.querySelector(".stagewrap");
+  function fitPhone() {
+    phone.style.transform = "none";
+    const avail = wrap.clientHeight - 24;
+    const scale = Math.min(1, avail / 800);
+    phone.style.transform = "scale(" + scale + ")";
+    phonebox.style.width = Math.ceil(380 * scale) + "px";
+    phonebox.style.height = Math.ceil(800 * scale) + "px";
+  }
+  window.addEventListener("resize", fitPhone);
+  fitPhone(); setTimeout(fitPhone, 200);
+</script>
+</body>
+</html>

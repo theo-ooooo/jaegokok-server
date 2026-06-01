@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재고콕 — 로고 & 브랜드</title>
+<link rel="stylesheet" href="assets/jaegokkok.css">
+<style>
+  body { background: var(--bg-alt); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: var(--space-9) var(--gutter) var(--space-10); }
+
+  /* intro */
+  .hero { display: grid; gap: var(--space-5); margin-bottom: var(--space-9); }
+  .hero .ey { display:flex; align-items:center; gap:12px; }
+  .hero .slogan { font-size: clamp(28px,4vw,52px); font-weight: var(--fw-black); letter-spacing: var(--tk-tight); line-height: 1.05; }
+  .hero .slogan em { color: var(--brand); font-style: normal; }
+  .hero p { max-width: 56ch; margin: 0; }
+
+  .sec { margin-top: var(--space-10); }
+  .sec-head { display:flex; align-items:baseline; gap:16px; margin-bottom: var(--space-6); border-bottom: 1px solid var(--border); padding-bottom: var(--space-4); }
+  .sec-head h2 { margin:0; }
+
+  /* concept grid */
+  .concepts { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--space-5); }
+  @media (max-width: 880px){ .concepts { grid-template-columns: 1fr; } }
+  .concept { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-3); overflow: hidden; display:flex; flex-direction:column; }
+  .concept .stage { height: 220px; display:flex; align-items:center; justify-content:center; border-bottom: 1px solid var(--border); background:
+      linear-gradient(var(--ink-04) 1px, transparent 1px) 0 0/100% 28px,
+      var(--bg); }
+  .concept .meta { padding: var(--space-5); }
+  .concept .meta .num { font-family: var(--font-mono); font-size:12px; color: var(--brand); letter-spacing:.1em; }
+  .concept .meta h3 { margin: 8px 0 6px; }
+  .concept .meta p { margin:0; font-size: 14px; }
+  .concept.is-primary .stage { background:
+      linear-gradient(var(--brand-08) 1px, transparent 1px) 0 0/100% 28px, var(--bg-tint); }
+  .pri-tag { display:inline-block; font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color: var(--brand-ink); background: var(--brand); padding:3px 8px; border-radius: var(--r-1); margin-bottom:10px; }
+
+  /* lockup */
+  .lockup { display:flex; align-items:center; gap:16px; }
+  .lockup .ic { flex:none; }
+  .lockup .wm { display:flex; flex-direction:column; line-height:1; }
+  .lockup .wm .ko { font-weight: var(--fw-black); letter-spacing: var(--tk-tight); color: var(--text-primary); }
+  .lockup .wm .ko .dot { color: var(--brand); }
+  .lockup .wm .en { font-size: 11px; font-weight: var(--fw-bold); letter-spacing: .22em; text-transform: uppercase; color: var(--text-tertiary); margin-top: 8px; }
+  .lockup.size-lg .ko { font-size: 46px; }
+  .lockup.size-md .ko { font-size: 34px; }
+
+  /* version board */
+  .versions { display:grid; grid-template-columns: repeat(3,1fr); gap: var(--space-5); }
+  @media (max-width: 880px){ .versions { grid-template-columns: 1fr; } }
+  .vcard { border:1px solid var(--border); border-radius: var(--r-3); overflow:hidden; }
+  .vcard .vstage { height: 180px; display:flex; align-items:center; justify-content:center; }
+  .vcard.light .vstage { background: var(--bg); }
+  .vcard.dark .vstage { background: var(--text-primary); }
+  .vcard.icon .vstage { background: var(--bg-alt); }
+  .vcard .vfoot { padding: 12px 16px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .vcard .vfoot .t-mono { font-size: 11px; }
+
+  /* dark lockup text */
+  .lockup.on-dark .ko { color: #fff; }
+  .lockup.on-dark .ko .dot { color: var(--brand-soft); }
+  .lockup.on-dark .en { color: rgba(255,255,255,.55); }
+
+  /* color section */
+  .palette { display:grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: var(--space-4); }
+  .sw { border:1px solid var(--border); border-radius: var(--r-3); overflow:hidden; background: var(--bg-card); }
+  .sw .chip { height: 96px; }
+  .sw .info { padding: 12px 14px; }
+  .sw .info .nm { font-weight: var(--fw-bold); font-size: 14px; }
+  .sw .info .hex { font-family: var(--font-mono); font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+  .sw .info .role { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+
+  /* clearspace / usage */
+  .usage { display:grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+  @media (max-width:880px){ .usage { grid-template-columns: 1fr; } }
+  .donts { display:grid; gap:10px; }
+  .dont { display:flex; gap:10px; align-items:flex-start; font-size:14px; color: var(--text-secondary); }
+  .dont .x { color: var(--danger); font-weight:900; flex:none; }
+  .nav { position: sticky; top:0; z-index:10; background: rgba(255,255,255,.8); backdrop-filter: blur(10px); border-bottom:1px solid var(--border); }
+  .nav .inner { max-width:1120px; margin:0 auto; padding: 14px var(--gutter); display:flex; align-items:center; gap:20px; }
+  .nav a { font-size:13px; color: var(--text-secondary); text-decoration:none; font-weight:600; }
+  .nav a:hover { color: var(--brand); }
+  .nav .home { margin-left:auto; }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="inner">
+    <span class="t-label">재고콕 · BRAND</span>
+    <a href="#concepts">컨셉</a>
+    <a href="#versions">버전</a>
+    <a href="#color">컬러</a>
+    <a href="#usage">사용규칙</a>
+    <a class="home" href="index.html">← 전체 보기</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- INTRO -->
+  <header class="hero">
+    <div class="ey"><span class="t-label">Logo &amp; Identity</span><span class="t-mono">v1 · 2026.06</span></div>
+    <div class="slogan">QR 하나로 재고 끝.<br><em>스캔하면 콕, 입출고 완료.</em></div>
+    <p class="t-body">소상공인을 위한 QR 기반 재고 관리. ‘<strong style="color:var(--text-primary)">콕</strong>’은 정확히 한 번 찍는다는 뜻 — 스캔하고 콕 누르면 끝나는 경험을 체크마크로 형상화했습니다. 신뢰감 있는 딥 인디고 한 가지 색으로 절제하되, 작은 사업장 사장님도 친근하게 다가갈 수 있게 다듬었습니다.</p>
+  </header>
+
+  <!-- CONCEPTS -->
+  <section class="sec" id="concepts">
+    <div class="sec-head">
+      <span class="kicker-num">01</span>
+      <h2 class="t-h2">로고 컨셉 3안</h2>
+    </div>
+    <div class="concepts">
+
+      <!-- Concept A : recommended -->
+      <div class="concept is-primary">
+        <div class="stage">
+          <div class="lockup size-md">
+            <span class="ic">
+              <svg width="62" height="62" viewBox="0 0 64 64" aria-label="재고콕 박스체크 아이콘">
+                <rect x="7" y="7" width="50" height="50" rx="6" fill="var(--brand)"/>
+                <path d="M19 33 l9 9 l17 -19" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="wm"><span class="ko">재고콕<span class="dot">.</span></span><span class="en">JaegokKok</span></span>
+          </div>
+        </div>
+        <div class="meta">
+          <span class="pri-tag">추천 · Primary</span>
+          <div class="num">CONCEPT A</div>
+          <h3 class="t-h3">박스 체크 (Box Check)</h3>
+          <p class="t-body">재고(박스)와 완료(체크)를 한 면에 담은 가장 직관적인 안. 꽉 찬 인디고 면 + 흰 체크로 멀리서도 또렷하고, 앱 아이콘·파비콘으로 바로 쓸 수 있습니다.</p>
+        </div>
+      </div>
+
+      <!-- Concept B -->
+      <div class="concept">
+        <div class="stage">
+          <div class="lockup size-md">
+            <span class="ic">
+              <svg width="64" height="62" viewBox="0 0 66 64" aria-label="재고콕 콕도트 아이콘">
+                <path d="M18 40 l11 11 l28 -34" fill="none" stroke="var(--brand)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="18" cy="40" r="7.5" fill="var(--brand)"/>
+              </svg>
+            </span>
+            <span class="wm"><span class="ko">재고콕</span><span class="en">JaegokKok</span></span>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="num">CONCEPT B</div>
+          <h3 class="t-h3">콕 도트 (Kok Dot)</h3>
+          <p class="t-body">체크마크의 시작점을 ‘콕 찍는 점’으로 만든 컨테이너 없는 글리프. 가볍고 친근하며 모션(점 → 체크 그리기)으로 확장하기 좋습니다.</p>
+        </div>
+      </div>
+
+      <!-- Concept C -->
+      <div class="concept">
+        <div class="stage">
+          <div class="lockup size-md">
+            <span class="ic">
+              <svg width="62" height="62" viewBox="0 0 64 64" aria-label="재고콕 QR체크 아이콘">
+                <rect x="8" y="8" width="19" height="19" fill="none" stroke="var(--brand)" stroke-width="4"/>
+                <rect x="14.5" y="14.5" width="6" height="6" fill="var(--brand)"/>
+                <rect x="38" y="8" width="6" height="6" fill="var(--brand)"/>
+                <rect x="50" y="8" width="6" height="6" fill="var(--brand)"/>
+                <rect x="8" y="50" width="6" height="6" fill="var(--brand)"/>
+                <path d="M33 41 l7 7 l16 -18" fill="none" stroke="var(--brand)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="wm"><span class="ko">재고콕</span><span class="en">JaegokKok</span></span>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="num">CONCEPT C</div>
+          <h3 class="t-h3">QR 체크 (QR Check)</h3>
+          <p class="t-body">QR 파인더 패턴 + 체크를 결합한 기술적인 안. ‘스캔해서 확인한다’는 기능을 가장 명시적으로 말합니다. 단색 라인이라 작은 사이즈에선 디테일이 뭉칠 수 있어 보조 용도 권장.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- VERSIONS (of primary) -->
+  <section class="sec" id="versions">
+    <div class="sec-head">
+      <span class="kicker-num">02</span>
+      <h2 class="t-h2">버전 — 라이트 / 다크 / 아이콘</h2>
+    </div>
+    <p class="t-body" style="margin-top:-12px; margin-bottom:var(--space-6); max-width:60ch;">추천안(박스 체크) 기준. 단색 한 가지로 운영되므로 어떤 배경에서도 일관됩니다.</p>
+    <div class="versions">
+
+      <div class="vcard light">
+        <div class="vstage">
+          <div class="lockup size-lg">
+            <span class="ic">
+              <svg width="76" height="76" viewBox="0 0 64 64"><rect x="7" y="7" width="50" height="50" rx="6" fill="var(--brand)"/><path d="M19 33 l9 9 l17 -19" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="wm"><span class="ko">재고콕<span class="dot">.</span></span><span class="en">JaegokKok</span></span>
+          </div>
+        </div>
+        <div class="vfoot"><span style="font-weight:700;font-size:13px;">Light Lockup</span><span class="t-mono">#FFFFFF BG</span></div>
+      </div>
+
+      <div class="vcard dark">
+        <div class="vstage">
+          <div class="lockup size-lg on-dark">
+            <span class="ic">
+              <svg width="76" height="76" viewBox="0 0 64 64"><rect x="7" y="7" width="50" height="50" rx="6" fill="#fff"/><path d="M19 33 l9 9 l17 -19" fill="none" stroke="var(--brand)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span class="wm"><span class="ko">재고콕<span class="dot">.</span></span><span class="en">JaegokKok</span></span>
+          </div>
+        </div>
+        <div class="vfoot"><span style="font-weight:700;font-size:13px;">Dark Lockup</span><span class="t-mono">#0B0D12 BG</span></div>
+      </div>
+
+      <div class="vcard icon">
+        <div class="vstage">
+          <div style="display:flex; gap:20px; align-items:center;">
+            <svg width="72" height="72" viewBox="0 0 64 64"><rect x="7" y="7" width="50" height="50" rx="6" fill="var(--brand)"/><path d="M19 33 l9 9 l17 -19" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg width="44" height="44" viewBox="0 0 64 64"><rect x="7" y="7" width="50" height="50" rx="6" fill="var(--brand)"/><path d="M19 33 l9 9 l17 -19" fill="none" stroke="#fff" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg width="28" height="28" viewBox="0 0 64 64"><rect x="7" y="7" width="50" height="50" rx="6" fill="var(--brand)"/><path d="M19 33 l9 9 l17 -19" fill="none" stroke="#fff" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <div class="vfoot"><span style="font-weight:700;font-size:13px;">App Icon / Favicon</span><span class="t-mono">72·44·28 px</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- COLOR -->
+  <section class="sec" id="color">
+    <div class="sec-head">
+      <span class="kicker-num">03</span>
+      <h2 class="t-h2">브랜드 컬러</h2>
+    </div>
+    <p class="t-body" style="margin-top:-12px; margin-bottom:var(--space-6); max-width:62ch;">메인은 <strong style="color:var(--brand)">딥 인디고 #3A5BD9</strong> 한 가지. 신뢰와 안정을 주는 깊은 파랑으로, 흰 캔버스 위에서 절제되게 씁니다. 상태 표시(입고·저재고·출고)는 채도를 낮춘 기능색으로 최소한만 더했습니다.</p>
+    <div class="palette">
+      <div class="sw"><div class="chip" style="background:#3A5BD9"></div><div class="info"><div class="nm">Brand / Deep Indigo</div><div class="hex">#3A5BD9</div><div class="role">로고·CTA·핵심 강조</div></div></div>
+      <div class="sw"><div class="chip" style="background:#2B47B8"></div><div class="info"><div class="nm">Brand Strong</div><div class="hex">#2B47B8</div><div class="role">hover · pressed</div></div></div>
+      <div class="sw"><div class="chip" style="background:#5383E8"></div><div class="info"><div class="nm">Brand Soft</div><div class="hex">#5383E8</div><div class="role">보조 강조 · 다크 위 글리프</div></div></div>
+      <div class="sw"><div class="chip" style="background:#EEF3FE"></div><div class="info"><div class="nm">Brand Tint</div><div class="hex">#EEF3FE</div><div class="role">선택·hover 배경 워시</div></div></div>
+      <div class="sw"><div class="chip" style="background:#0B0D12"></div><div class="info"><div class="nm">Ink</div><div class="hex">#0B0D12</div><div class="role">제목·핵심 텍스트</div></div></div>
+      <div class="sw"><div class="chip" style="background:#5C636E"></div><div class="info"><div class="nm">Text Secondary</div><div class="hex">#5C636E</div><div class="role">본문</div></div></div>
+      <div class="sw"><div class="chip" style="background:#1E9E6A"></div><div class="info"><div class="nm">OK / 입고</div><div class="hex">#1E9E6A</div><div class="role">재고 양호 · 입고</div></div></div>
+      <div class="sw"><div class="chip" style="background:#C9871F"></div><div class="info"><div class="nm">Warn / 저재고</div><div class="hex">#C9871F</div><div class="role">저재고 경고</div></div></div>
+      <div class="sw"><div class="chip" style="background:#D6453F"></div><div class="info"><div class="nm">Danger / 출고</div><div class="hex">#D6453F</div><div class="role">출고 · 품절 · 오류</div></div></div>
+    </div>
+  </section>
+
+  <!-- USAGE -->
+  <section class="sec" id="usage">
+    <div class="sec-head">
+      <span class="kicker-num">04</span>
+      <h2 class="t-h2">사용 규칙</h2>
+    </div>
+    <div class="usage">
+      <div class="card">
+        <span class="t-label">Clearspace &amp; Min size</span>
+        <div style="display:flex; align-items:center; gap:24px; margin-top:20px; flex-wrap:wrap;">
+          <div style="position:relative; padding:24px; border:1px dashed var(--border-strong);">
+            <svg width="56" height="56" viewBox="0 0 64 64"><rect x="7" y="7" width="50" height="50" rx="6" fill="var(--brand)"/><path d="M19 33 l9 9 l17 -19" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <p class="t-body" style="margin:0; flex:1; min-width:200px;">아이콘 높이의 <strong style="color:var(--text-primary)">½</strong> 만큼 여백 확보. 최소 사용 크기는 아이콘 <strong style="color:var(--text-primary)">20px</strong>, 한글 워드마크 동반 시 <strong style="color:var(--text-primary)">120px</strong> 폭.</p>
+        </div>
+      </div>
+      <div class="card">
+        <span class="t-label" style="color:var(--danger)">하지 말 것</span>
+        <div class="donts" style="margin-top:16px;">
+          <div class="dont"><span class="x">✕</span><span>인디고 외 다른 색으로 채우기 (단색 원칙 유지)</span></div>
+          <div class="dont"><span class="x">✕</span><span>체크마크 기울이기·비율 변형</span></div>
+          <div class="dont"><span class="x">✕</span><span>그라데이션·그림자·외곽선 추가</span></div>
+          <div class="dont"><span class="x">✕</span><span>한글/영문 워드마크를 임의 폰트로 교체</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

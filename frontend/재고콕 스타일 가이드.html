@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>재고콕 — 스타일 가이드</title>
+<link rel="stylesheet" href="assets/jaegokkok.css">
+<style>
+  body { background: var(--bg-alt); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: var(--space-8) var(--gutter) var(--space-10); }
+  .nav { position: sticky; top:0; z-index:10; background: rgba(255,255,255,.8); backdrop-filter: blur(10px); border-bottom:1px solid var(--border); }
+  .nav .inner { max-width:1080px; margin:0 auto; padding: 14px var(--gutter); display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+  .nav a { font-size:13px; color: var(--text-secondary); text-decoration:none; font-weight:600; }
+  .nav a:hover { color: var(--brand); }
+  .nav .home { margin-left:auto; }
+
+  .sec { margin-top: var(--space-9); }
+  .sec-head { display:flex; align-items:baseline; gap:16px; margin-bottom: var(--space-5); border-bottom:1px solid var(--border); padding-bottom: var(--space-3); }
+  .sec-head h2 { margin:0; }
+  .panel { background: var(--bg-card); border:1px solid var(--border); border-radius: var(--r-3); padding: var(--space-6); }
+  .row { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; }
+  .stack { display:flex; flex-direction:column; gap: var(--space-5); }
+  .state-grid { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: var(--space-5); }
+  .spec { display:flex; flex-direction:column; gap:10px; }
+  .spec .cap { font-family: var(--font-mono); font-size:11px; color: var(--text-tertiary); letter-spacing:.06em; text-transform:uppercase; }
+  .force-hover { background: var(--brand-strong)!important; border-color: var(--brand-strong)!important; }
+  .force-hover-ghost { background: var(--bg-tint)!important; border-color: var(--brand)!important; color: var(--brand)!important; }
+  .force-focus { outline:none; border-color: var(--brand)!important; box-shadow: 0 0 0 3px var(--brand-08)!important; }
+  .legend { font-size:13px; color: var(--text-secondary); margin: 0 0 var(--space-5); max-width: 64ch; }
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="inner">
+    <span class="t-label">재고콕 · STYLE GUIDE</span>
+    <a href="#type">타입</a>
+    <a href="#buttons">버튼</a>
+    <a href="#inputs">인풋</a>
+    <a href="#cards">카드</a>
+    <a href="#badges">배지</a>
+    <a href="#table">테이블</a>
+    <a class="home" href="index.html">← 전체 보기</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header style="display:grid; gap:14px;">
+    <span class="t-label">Components &amp; States</span>
+    <h1 class="t-h1" style="margin:0;">스타일 가이드</h1>
+    <p class="legend">Tailwind로 1:1 옮길 수 있는 수준의 핵심 컴포넌트와 상태 정의. 모든 인터랙티브 요소는 최소 터치 타깃 44px, 하드엣지(radius 2–8px), 단색 인디고 강조를 따릅니다.</p>
+  </header>
+
+  <!-- TYPE -->
+  <section class="sec" id="type">
+    <div class="sec-head"><span class="kicker-num">01</span><h2 class="t-h2">타이포그래피</h2></div>
+    <div class="panel stack">
+      <div style="display:flex; align-items:baseline; gap:20px; flex-wrap:wrap;"><span class="t-display" style="font-size:56px;">재고 끝.</span><span class="t-mono">Display · 900 · Pretendard</span></div>
+      <hr class="divider">
+      <div style="display:flex; align-items:baseline; gap:20px; flex-wrap:wrap;"><span class="t-h1">총 상품 1,284개</span><span class="t-mono">H1 · 900</span></div>
+      <div style="display:flex; align-items:baseline; gap:20px; flex-wrap:wrap;"><span class="t-h2">오늘의 입출고</span><span class="t-mono">H2 · 800</span></div>
+      <div style="display:flex; align-items:baseline; gap:20px; flex-wrap:wrap;"><span class="t-h3">저재고 알림 3건</span><span class="t-mono">H3 · 700</span></div>
+      <div style="display:flex; align-items:baseline; gap:20px; flex-wrap:wrap;"><span class="t-body" style="color:var(--text-primary)">QR을 스캔하면 수량만 입력하면 됩니다. 별도 장비 없이 스마트폰으로 입출고를 기록하세요.</span><span class="t-mono">Body · 400 · 16/1.6</span></div>
+      <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;"><span class="t-label">Inventory · Realtime</span><span class="t-mono">Label · 700 · .16em · UPPER · accent</span></div>
+    </div>
+  </section>
+
+  <!-- BUTTONS -->
+  <section class="sec" id="buttons">
+    <div class="sec-head"><span class="kicker-num">02</span><h2 class="t-h2">버튼</h2></div>
+    <div class="state-grid">
+      <div class="panel spec"><div class="cap">Primary</div><button class="btn">QR 다운로드</button></div>
+      <div class="panel spec"><div class="cap">Primary · hover</div><button class="btn force-hover">QR 다운로드</button></div>
+      <div class="panel spec"><div class="cap">Primary · disabled</div><button class="btn" disabled>QR 다운로드</button></div>
+      <div class="panel spec"><div class="cap">Ghost</div><button class="btn btn--ghost">필터</button></div>
+      <div class="panel spec"><div class="cap">Ghost · hover</div><button class="btn btn--ghost force-hover-ghost">필터</button></div>
+      <div class="panel spec"><div class="cap">Ghost · disabled</div><button class="btn btn--ghost" disabled>필터</button></div>
+      <div class="panel spec"><div class="cap">Quiet</div><button class="btn btn--quiet">취소</button></div>
+      <div class="panel spec"><div class="cap">Danger</div><button class="btn btn--danger">계정 삭제</button></div>
+      <div class="panel spec"><div class="cap">Sizes</div><div class="row" style="align-items:center;"><button class="btn btn--sm">SM</button><button class="btn">MD</button><button class="btn btn--lg">LG</button></div></div>
+    </div>
+  </section>
+
+  <!-- INPUTS -->
+  <section class="sec" id="inputs">
+    <div class="sec-head"><span class="kicker-num">03</span><h2 class="t-h2">인풋 & 폼</h2></div>
+    <div class="state-grid">
+      <div class="panel"><div class="cap" style="margin-bottom:12px;">Default</div><div class="field"><label>상품명</label><input class="input" placeholder="예: 콜드브루 원두 1kg"></div></div>
+      <div class="panel"><div class="cap" style="margin-bottom:12px;">Focus</div><div class="field"><label>상품명</label><input class="input force-focus" value="콜드브루 원두 1kg"></div></div>
+      <div class="panel"><div class="cap" style="margin-bottom:12px;">Error</div><div class="field"><label>수량</label><input class="input input--error" value="-3"><span class="field-error">0보다 큰 값을 입력하세요.</span></div></div>
+      <div class="panel"><div class="cap" style="margin-bottom:12px;">Disabled</div><div class="field"><label>SKU (자동생성)</label><input class="input" value="SKU-00482" disabled></div></div>
+      <div class="panel"><div class="cap" style="margin-bottom:12px;">With icon + hint</div><div class="field"><label>검색</label><div class="input-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input class="input" placeholder="상품·SKU 검색"></div><span class="field-hint">이름 또는 SKU로 검색</span></div></div>
+      <div class="panel"><div class="cap" style="margin-bottom:12px;">Select</div><div class="field"><label>카테고리</label><select class="select"><option>전체 카테고리</option><option>원두</option><option>부자재</option><option>포장재</option></select></div></div>
+    </div>
+  </section>
+
+  <!-- CARDS -->
+  <section class="sec" id="cards">
+    <div class="sec-head"><span class="kicker-num">04</span><h2 class="t-h2">카드</h2></div>
+    <div class="state-grid">
+      <div class="panel spec"><div class="cap">Stat card</div>
+        <div class="card">
+          <span class="t-label">총 상품</span>
+          <div style="display:flex; align-items:baseline; gap:8px; margin-top:10px;"><span class="t-h1" style="font-size:40px;">1,284</span><span class="t-body" style="margin:0;">SKU</span></div>
+          <div class="badge badge--ok" style="margin-top:14px;"><span class="dot"></span>지난주 대비 +24</div>
+        </div>
+      </div>
+      <div class="panel spec"><div class="cap">Default → Hover (호버해 보세요)</div>
+        <div class="card card--hover">
+          <span class="t-label">저재고 알림</span>
+          <h3 class="t-h3" style="margin:10px 0 6px;">콜드브루 원두 1kg</h3>
+          <p class="t-body" style="margin:0;">남은 수량 <strong style="color:var(--warn)">4</strong> · 안전재고 20</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BADGES -->
+  <section class="sec" id="badges">
+    <div class="sec-head"><span class="kicker-num">05</span><h2 class="t-h2">배지 / 상태</h2></div>
+    <div class="panel"><div class="row" style="align-items:center;">
+      <span class="badge badge--ok"><span class="dot"></span>재고 양호</span>
+      <span class="badge badge--warn"><span class="dot"></span>저재고</span>
+      <span class="badge badge--danger"><span class="dot"></span>품절</span>
+      <span class="badge badge--brand"><span class="dot"></span>입고 대기</span>
+      <span class="badge"><span class="dot"></span>비활성</span>
+      <span class="badge badge--brand">OWNER</span>
+      <span class="badge">EMPLOYEE</span>
+    </div></div>
+  </section>
+
+  <!-- TABLE -->
+  <section class="sec" id="table">
+    <div class="sec-head"><span class="kicker-num">06</span><h2 class="t-h2">테이블</h2></div>
+    <div class="panel" style="padding:0; overflow:hidden;">
+      <table class="tbl">
+        <thead><tr><th>상품명</th><th>SKU</th><th>카테고리</th><th>재고</th><th>상태</th></tr></thead>
+        <tbody>
+          <tr><td class="cell-primary">콜드브루 원두 1kg</td><td class="t-mono" style="color:var(--text-secondary)">SKU-00482</td><td>원두</td><td class="cell-primary">4</td><td><span class="badge badge--warn"><span class="dot"></span>저재고</span></td></tr>
+          <tr><td class="cell-primary">종이컵 16oz (1000입)</td><td class="t-mono" style="color:var(--text-secondary)">SKU-00121</td><td>포장재</td><td class="cell-primary">38</td><td><span class="badge badge--ok"><span class="dot"></span>양호</span></td></tr>
+          <tr><td class="cell-primary">시럽 바닐라 750ml</td><td class="t-mono" style="color:var(--text-secondary)">SKU-00310</td><td>부자재</td><td class="cell-primary">0</td><td><span class="badge badge--danger"><span class="dot"></span>품절</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="legend" style="margin-top:12px;">행 hover 시 <code style="font-family:var(--font-mono);font-size:12px;background:var(--bg-tint);padding:2px 6px;border-radius:4px;">--bg-alt</code> 배경. 헤더는 sticky.</p>
+  </section>
+
+</div>
+</body>
+</html>
