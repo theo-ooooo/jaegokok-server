@@ -35,6 +35,7 @@ public class ProductRepositoryImpl implements ProductRepository {
                 request.unit(),
                 request.category(),
                 request.minStockLevel() != null ? request.minStockLevel() : 0,
+                0,
                 qrCode
         );
         return toProduct(productJpaRepository.save(entity));
@@ -77,6 +78,19 @@ public class ProductRepositoryImpl implements ProductRepository {
         productJpaRepository.deleteById(id);
     }
 
+    @Override
+    public Optional<Product> findByQrCode(String qrCode) {
+        return productJpaRepository.findByQrCode(qrCode).map(this::toProduct);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public void adjustStock(Long productId, int delta) {
+        ProductEntity entity = productJpaRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        entity.adjustStock(delta);
+    }
+
     private Product toProduct(ProductEntity e) {
         return new Product(
                 e.getId(),
@@ -88,6 +102,7 @@ public class ProductRepositoryImpl implements ProductRepository {
                 e.getUnit(),
                 e.getCategory(),
                 e.getMinStockLevel(),
+                e.getCurrentStock(),
                 e.getQrCode(),
                 e.getCreatedAt()
         );

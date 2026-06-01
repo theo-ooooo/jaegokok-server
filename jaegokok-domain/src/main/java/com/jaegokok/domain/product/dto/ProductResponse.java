@@ -15,6 +15,7 @@ public record ProductResponse(
         String unit,
         String category,
         int minStockLevel,
+        int currentStock,
         String qrCode,
         LocalDateTime createdAt
 ) {
@@ -29,6 +30,7 @@ public record ProductResponse(
                 product.unit(),
                 product.category(),
                 product.minStockLevel(),
+                product.currentStock(),
                 product.qrCode(),
                 product.createdAt()
         );
