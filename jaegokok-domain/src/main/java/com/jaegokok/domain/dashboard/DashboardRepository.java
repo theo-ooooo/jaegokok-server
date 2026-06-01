@@ -5,9 +5,11 @@ import com.jaegokok.domain.dashboard.dto.LowStockProduct;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public interface DashboardRepository {
     long countProducts(Long workspaceId);
-    List<LowStockProduct> findLowStockProducts(Long workspaceId);
-    long countTodayRecords(Long workspaceId, InventoryType type, LocalDate today);
+    long countLowStockProducts(Long workspaceId);
+    List<LowStockProduct> findLowStockProducts(Long workspaceId, int limit);
+    Map<InventoryType, Long> countTodayRecordsByType(Long workspaceId, LocalDate today);
 }

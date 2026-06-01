@@ -12,11 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class DashboardService {
+
+    private static final int LOW_STOCK_PREVIEW_LIMIT = 10;
 
     private final DashboardRepository dashboardRepository;
     private final WorkspaceRepository workspaceRepository;
@@ -28,16 +31,16 @@ public class DashboardService {
 
         LocalDate today = LocalDate.now();
         long totalProducts = dashboardRepository.countProducts(workspaceId);
-        List<LowStockProduct> lowStockProducts = dashboardRepository.findLowStockProducts(workspaceId);
-        long todayInCount = dashboardRepository.countTodayRecords(workspaceId, InventoryType.IN, today);
-        long todayOutCount = dashboardRepository.countTodayRecords(workspaceId, InventoryType.OUT, today);
+        long lowStockCount = dashboardRepository.countLowStockProducts(workspaceId);
+        List<LowStockProduct> lowStockProducts = dashboardRepository.findLowStockProducts(workspaceId, LOW_STOCK_PREVIEW_LIMIT);
+        Map<InventoryType, Long> todayCounts = dashboardRepository.countTodayRecordsByType(workspaceId, today);
 
         return new DashboardResponse(
                 totalProducts,
-                lowStockProducts.size(),
+                lowStockCount,
                 lowStockProducts,
-                todayInCount,
-                todayOutCount
+                todayCounts.getOrDefault(InventoryType.IN, 0L),
+                todayCounts.getOrDefault(InventoryType.OUT, 0L)
         );
     }
 }
