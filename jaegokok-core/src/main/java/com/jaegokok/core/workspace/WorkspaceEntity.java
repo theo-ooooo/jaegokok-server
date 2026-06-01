@@ -8,6 +8,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "workspaces")
 @Getter
@@ -43,9 +46,8 @@ public class WorkspaceEntity extends BaseEntity {
     @Column(length = 50)
     private String phone;
 
-    @Column(length = 500)
-    private String logoUrl;
-
+    @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<WorkspaceLogoEntity> logos = new ArrayList<>();
 
     @Builder
     private WorkspaceEntity(MemberEntity owner, String name, String description, WorkspacePlan plan) {
@@ -75,7 +77,4 @@ public class WorkspaceEntity extends BaseEntity {
         if (phone != null) this.phone = phone;
     }
 
-    public void updateLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
-    }
 }

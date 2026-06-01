@@ -4,8 +4,10 @@ import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.core.member.MemberEntity;
 import com.jaegokok.core.workspace.WorkspaceEntity;
+import com.jaegokok.core.workspace.WorkspaceLogoEntity;
 import com.jaegokok.core.workspace.WorkspacePlan;
 import com.jaegokok.domain.workspace.Workspace;
+import com.jaegokok.domain.workspace.WorkspaceLogo;
 import com.jaegokok.domain.workspace.WorkspaceRepository;
 import com.jaegokok.infra.member.MemberJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -58,15 +60,9 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
         return toWorkspace(entity);
     }
 
-    @Override
-    public Workspace updateLogoUrl(Long ownerId, String logoUrl) {
-        WorkspaceEntity entity = workspaceJpaRepository.findByOwner_Id(ownerId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        entity.updateLogoUrl(logoUrl);
-        return toWorkspace(entity);
-    }
-
     private Workspace toWorkspace(WorkspaceEntity e) {
+        WorkspaceLogo logo = e.getLogos().isEmpty() ? null
+                : toWorkspaceLogo(e.getLogos().get(0));
         return new Workspace(
                 e.getId(),
                 e.getOwner().getId(),
@@ -77,9 +73,13 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
                 e.getBusinessNumber(),
                 e.getAddress(),
                 e.getPhone(),
-                e.getLogoUrl(),
+                logo,
                 e.getCreatedAt()
         );
+    }
+
+    private WorkspaceLogo toWorkspaceLogo(WorkspaceLogoEntity e) {
+        return new WorkspaceLogo(e.getId(), e.getWorkspace().getId(), e.getOriginalPath(), e.getWebpPath(), e.getBucket(), e.getCreatedAt());
     }
 
 }
