@@ -49,7 +49,7 @@ public class InventoryRecordQueryRepositoryImpl implements InventoryRecordQueryR
         if (condition.productId() != null) builder.and(ir.product.id.eq(condition.productId()));
         if (condition.type() != null) builder.and(ir.type.eq(condition.type()));
         if (condition.dateFrom() != null) builder.and(ir.createdAt.goe(condition.dateFrom().atStartOfDay()));
-        if (condition.dateTo() != null) builder.and(ir.createdAt.loe(condition.dateTo().atTime(23, 59, 59)));
+        if (condition.dateTo() != null) builder.and(ir.createdAt.lt(condition.dateTo().plusDays(1).atStartOfDay()));
 
         List<InventoryRecordEntity> content = queryFactory.selectFrom(ir)
                 .join(ir.product, product).fetchJoin()
