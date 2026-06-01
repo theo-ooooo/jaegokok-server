@@ -7,10 +7,15 @@ import com.jaegokok.core.workspace.WorkspaceMemberRole;
 import com.jaegokok.core.workspace.WorkspacePlan;
 import com.jaegokok.domain.file.FileUploadPort;
 import com.jaegokok.domain.image.ImageRepository;
+import com.jaegokok.domain.member.Member;
+import com.jaegokok.domain.member.MemberRepository;
 import com.jaegokok.domain.workspace.dto.CreateWorkspaceRequest;
+import com.jaegokok.domain.workspace.dto.InviteMemberRequest;
+import com.jaegokok.domain.workspace.dto.InviteMemberResponse;
 import com.jaegokok.domain.workspace.dto.UpdateWorkspaceProfileRequest;
 import com.jaegokok.domain.workspace.dto.WorkspaceResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +25,7 @@ public class WorkspaceService {
 
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
+    private final MemberRepository memberRepository;
     private final FileUploadPort fileUploadPort;
     private final ImageRepository imageRepository;
 
@@ -31,6 +37,26 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.save(memberId, request.name(), request.description(), WorkspacePlan.FREE);
         workspaceMemberRepository.save(workspace.id(), memberId, WorkspaceMemberRole.OWNER);
         return WorkspaceResponse.from(workspace);
+    }
+
+    @Transactional
+    public InviteMemberResponse inviteMember(Long inviterId, InviteMemberRequest request) {
+        Workspace workspace = workspaceRepository.findById(request.workspaceId())
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        if (!workspace.ownerId().equals(inviterId)) {
+            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
+        }
+        Member invitee = memberRepository.findByEmail(request.email())
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        if (workspaceMemberRepository.existsByWorkspaceIdAndMemberId(request.workspaceId(), invitee.id())) {
+            throw new CustomException(ErrorCode.WORKSPACE_MEMBER_ALREADY_EXISTS);
+        }
+        try {
+            WorkspaceMember workspaceMember = workspaceMemberRepository.save(request.workspaceId(), invitee.id(), WorkspaceMemberRole.EMPLOYEE);
+            return InviteMemberResponse.from(workspaceMember);
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomException(ErrorCode.WORKSPACE_MEMBER_ALREADY_EXISTS);
+        }
     }
 
     @Transactional
