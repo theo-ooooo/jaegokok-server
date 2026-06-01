@@ -45,5 +45,7 @@ public class WorkspaceMemberEntity {
                 .build();
     }
 
-
+    public void updateRole(WorkspaceMemberRole role) {
+        this.role = role;
+    }
 }

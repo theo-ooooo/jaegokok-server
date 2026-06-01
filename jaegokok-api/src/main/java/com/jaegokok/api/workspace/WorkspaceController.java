@@ -24,6 +24,11 @@ public class WorkspaceController {
 
     private final WorkspaceService workspaceService;
 
+    @GetMapping("/me")
+    public GlobalResponse<WorkspaceResponse> getMyWorkspace(@AuthenticationPrincipal UserPrincipal principal) {
+        return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.getMyWorkspace(principal.getId()));
+    }
+
     @PostMapping
     public GlobalResponse<WorkspaceResponse> create(
             @AuthenticationPrincipal UserPrincipal principal,

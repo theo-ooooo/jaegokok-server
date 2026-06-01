@@ -4,10 +4,16 @@ import com.jaegokok.api.security.UserPrincipal;
 import com.jaegokok.common.response.GlobalResponse;
 import com.jaegokok.domain.member.MemberService;
 import com.jaegokok.domain.member.dto.MemberResponse;
+import com.jaegokok.domain.workspace.WorkspaceService;
+import com.jaegokok.domain.workspace.dto.UpdateMemberRoleRequest;
+import com.jaegokok.domain.workspace.dto.WorkspaceMemberResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/members")
@@ -15,10 +21,35 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final WorkspaceService workspaceService;
 
     @GetMapping("/me")
     public GlobalResponse<MemberResponse> getMe(@AuthenticationPrincipal UserPrincipal principal) {
         return GlobalResponse.success(HttpStatus.OK.value(), memberService.getMe(principal.getId()));
+    }
+
+    @GetMapping
+    public GlobalResponse<List<WorkspaceMemberResponse>> listMembers(@AuthenticationPrincipal UserPrincipal principal) {
+        return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.listMembers(principal.getId()));
+    }
+
+    @PatchMapping("/{id}")
+    public GlobalResponse<WorkspaceMemberResponse> updateMemberRole(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateMemberRoleRequest request
+    ) {
+        return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.updateMemberRole(principal.getId(), id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public GlobalResponse<Void> removeMember(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id
+    ) {
+        workspaceService.removeMember(principal.getId(), id);
+        return GlobalResponse.success(HttpStatus.NO_CONTENT.value(), null);
     }
 
     @DeleteMapping("/me")
