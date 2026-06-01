@@ -50,8 +50,8 @@ public class WorkspaceService {
         if (workspaceMemberRepository.existsByWorkspaceIdAndMemberId(request.workspaceId(), invitee.id())) {
             throw new CustomException(ErrorCode.WORKSPACE_MEMBER_ALREADY_EXISTS);
         }
-        WorkspaceMember member = workspaceMemberRepository.save(request.workspaceId(), invitee.id(), WorkspaceMemberRole.EMPLOYEE);
-        return InviteMemberResponse.from(member);
+        WorkspaceMember workspaceMember = workspaceMemberRepository.save(request.workspaceId(), invitee.id(), WorkspaceMemberRole.EMPLOYEE);
+        return InviteMemberResponse.from(workspaceMember);
     }
 
     @Transactional
