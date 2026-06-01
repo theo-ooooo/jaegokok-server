@@ -15,5 +15,6 @@ public record Product(
         int minStockLevel,
         int currentStock,
         String qrCode,
+        String imageUrl,
         LocalDateTime createdAt
 ) {}

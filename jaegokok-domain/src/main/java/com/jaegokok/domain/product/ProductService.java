@@ -3,6 +3,7 @@ package com.jaegokok.domain.product;
 import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.core.workspace.WorkspacePlan;
+import com.jaegokok.domain.file.FileUploadPort;
 import com.jaegokok.domain.product.dto.CreateProductRequest;
 import com.jaegokok.domain.product.dto.ProductResponse;
 import com.jaegokok.domain.product.dto.ProductSearchCondition;
@@ -33,6 +34,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final WorkspaceRepository workspaceRepository;
     private final QrCodePort qrCodePort;
+    private final FileUploadPort fileUploadPort;
 
     @Transactional
     public ProductResponse create(Long memberId, CreateProductRequest request) {
@@ -108,6 +110,18 @@ public class ProductService {
                 .map(p -> new QrItem(p.qrCode(), p.name()))
                 .toList();
         return qrCodePort.generateBulkQrPdf(items);
+    }
+
+    @Transactional
+    public ProductResponse uploadImage(Long memberId, Long productId, String originalFilename, byte[] content, String contentType) {
+        Workspace workspace = getOwnerWorkspace(memberId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        if (!product.workspaceId().equals(workspace.id())) {
+            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
+        }
+        String imageUrl = fileUploadPort.upload("products", originalFilename, content, contentType);
+        return ProductResponse.from(productRepository.updateImageUrl(productId, imageUrl));
     }
 
     private Workspace getOwnerWorkspace(Long memberId) {

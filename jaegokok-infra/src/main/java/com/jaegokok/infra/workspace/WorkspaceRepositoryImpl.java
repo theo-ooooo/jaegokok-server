@@ -35,6 +35,11 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
     }
 
     @Override
+    public Optional<Workspace> findByOwnerId(Long ownerId) {
+        return workspaceJpaRepository.findByOwner_Id(ownerId).map(this::toWorkspace);
+    }
+
+    @Override
     public List<Workspace> findAllByMemberId(Long memberId) {
         return workspaceQueryRepository.findAllByMemberId(memberId)
                 .stream().map(this::toWorkspace).toList();
@@ -46,8 +51,19 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
     }
 
     @Override
-    public Optional<Workspace> findByOwnerId(Long ownerId) {
-        return workspaceJpaRepository.findByOwner_Id(ownerId).map(this::toWorkspace);
+    public Workspace updateProfile(Long ownerId, String companyName, String businessNumber, String address, String phone) {
+        WorkspaceEntity entity = workspaceJpaRepository.findByOwner_Id(ownerId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        entity.updateProfile(companyName, businessNumber, address, phone);
+        return toWorkspace(entity);
+    }
+
+    @Override
+    public Workspace updateLogoUrl(Long ownerId, String logoUrl) {
+        WorkspaceEntity entity = workspaceJpaRepository.findByOwner_Id(ownerId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        entity.updateLogoUrl(logoUrl);
+        return toWorkspace(entity);
     }
 
     private Workspace toWorkspace(WorkspaceEntity e) {
@@ -57,6 +73,11 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
                 e.getName(),
                 e.getDescription(),
                 e.getPlan(),
+                e.getCompanyName(),
+                e.getBusinessNumber(),
+                e.getAddress(),
+                e.getPhone(),
+                e.getLogoUrl(),
                 e.getCreatedAt()
         );
     }

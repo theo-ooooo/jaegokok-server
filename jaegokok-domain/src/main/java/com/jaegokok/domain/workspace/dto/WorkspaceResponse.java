@@ -10,6 +10,11 @@ public record WorkspaceResponse(
         String name,
         String description,
         WorkspacePlan plan,
+        String companyName,
+        String businessNumber,
+        String address,
+        String phone,
+        String logoUrl,
         LocalDateTime createdAt
 ) {
     public static WorkspaceResponse from(Workspace workspace) {
@@ -18,6 +23,11 @@ public record WorkspaceResponse(
                 workspace.name(),
                 workspace.description(),
                 workspace.plan(),
+                workspace.companyName(),
+                workspace.businessNumber(),
+                workspace.address(),
+                workspace.phone(),
+                workspace.logoUrl(),
                 workspace.createdAt()
         );
     }
