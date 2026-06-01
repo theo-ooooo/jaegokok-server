@@ -1,9 +1,11 @@
 package com.jaegokok.domain.product.dto;
 
+import com.jaegokok.domain.image.dto.ImageResponse;
 import com.jaegokok.domain.product.Product;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ProductResponse(
         Long id,
@@ -17,7 +19,7 @@ public record ProductResponse(
         int minStockLevel,
         int currentStock,
         String qrCode,
-        String imageUrl,
+        List<ImageResponse> images,
         LocalDateTime createdAt
 ) {
     public static ProductResponse from(Product product) {
@@ -33,7 +35,7 @@ public record ProductResponse(
                 product.minStockLevel(),
                 product.currentStock(),
                 product.qrCode(),
-                product.imageUrl(),
+                product.images().stream().map(ImageResponse::from).toList(),
                 product.createdAt()
         );
     }

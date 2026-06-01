@@ -2,12 +2,15 @@ package com.jaegokok.infra.product;
 
 import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
+import com.jaegokok.core.image.ImageEntityType;
 import com.jaegokok.core.product.ProductEntity;
+import com.jaegokok.domain.image.Image;
 import com.jaegokok.domain.product.Product;
 import com.jaegokok.domain.product.ProductRepository;
 import com.jaegokok.domain.product.dto.CreateProductRequest;
 import com.jaegokok.domain.product.dto.ProductSearchCondition;
 import com.jaegokok.domain.product.dto.UpdateProductRequest;
+import com.jaegokok.infra.image.ImageJpaRepository;
 import com.jaegokok.infra.workspace.WorkspaceJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +28,7 @@ public class ProductRepositoryImpl implements ProductRepository {
     private final ProductJpaRepository productJpaRepository;
     private final ProductQueryRepository productQueryRepository;
     private final WorkspaceJpaRepository workspaceJpaRepository;
+    private final ImageJpaRepository imageJpaRepository;
 
     @Override
     public Product save(Long workspaceId, CreateProductRequest request, String qrCode) {
@@ -98,29 +102,11 @@ public class ProductRepositoryImpl implements ProductRepository {
         productJpaRepository.adjustStock(productId, delta);
     }
 
-    @Override
-    public Product updateImageUrl(Long productId, String imageUrl) {
-        ProductEntity entity = productJpaRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        entity.updateImageUrl(imageUrl);
-        return toProduct(entity);
-    }
-
     private Product toProduct(ProductEntity e) {
-        return new Product(
-                e.getId(),
-                e.getWorkspace().getId(),
-                e.getName(),
-                e.getSku(),
-                e.getDescription(),
-                e.getPrice(),
-                e.getUnit(),
-                e.getCategory(),
-                e.getMinStockLevel(),
-                e.getCurrentStock(),
-                e.getQrCode(),
-                e.getImageUrl(),
-                e.getCreatedAt()
-        );
+        List<Image> images = imageJpaRepository.findByEntityTypeAndEntityId(ImageEntityType.PRODUCT, e.getId())
+                .stream().map(img -> new Image(img.getId(), img.getEntityType(), img.getEntityId(), img.getOriginalPath(), img.getWebpPath(), img.getBucket(), img.getCreatedAt()))
+                .toList();
+        return new Product(e.getId(), e.getWorkspace().getId(), e.getName(), e.getSku(), e.getDescription(),
+                e.getPrice(), e.getUnit(), e.getCategory(), e.getMinStockLevel(), e.getCurrentStock(), e.getQrCode(), images, e.getCreatedAt());
     }
 }

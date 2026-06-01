@@ -1,6 +1,7 @@
 package com.jaegokok.domain.workspace.dto;
 
 import com.jaegokok.core.workspace.WorkspacePlan;
+import com.jaegokok.domain.image.dto.ImageResponse;
 import com.jaegokok.domain.workspace.Workspace;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ public record WorkspaceResponse(
         String businessNumber,
         String address,
         String phone,
-        String logoUrl,
+        ImageResponse logo,
         LocalDateTime createdAt
 ) {
     public static WorkspaceResponse from(Workspace workspace) {
@@ -27,7 +28,7 @@ public record WorkspaceResponse(
                 workspace.businessNumber(),
                 workspace.address(),
                 workspace.phone(),
-                workspace.logoUrl(),
+                workspace.logo() != null ? ImageResponse.from(workspace.logo()) : null,
                 workspace.createdAt()
         );
     }

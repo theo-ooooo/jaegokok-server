@@ -51,9 +51,6 @@ public class ProductEntity extends BaseEntity {
     @Column(name = "qr_code", nullable = false, unique = true, length = 36)
     private String qrCode;
 
-    @Column(length = 500)
-    private String imageUrl;
-
     @Builder
     private ProductEntity(WorkspaceEntity workspace, String name, String sku, String description,
                           BigDecimal price, String unit, String category, int minStockLevel, int currentStock, String qrCode) {
@@ -100,7 +97,4 @@ public class ProductEntity extends BaseEntity {
         if (minStockLevel != null) this.minStockLevel = minStockLevel;
     }
 
-    public void updateImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 }
