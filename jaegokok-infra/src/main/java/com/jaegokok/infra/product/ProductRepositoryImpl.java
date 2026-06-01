@@ -93,14 +93,17 @@ public class ProductRepositoryImpl implements ProductRepository {
     }
 
     @Override
-    public Optional<Product> findByQrCode(String qrCode) {
-        return productJpaRepository.findByQrCode(qrCode).map(this::toProduct);
-    }
-
-    @Override
     @Transactional
     public void adjustStock(Long productId, int delta) {
         productJpaRepository.adjustStock(productId, delta);
+    }
+
+    @Override
+    public Product updateImageUrl(Long productId, String imageUrl) {
+        ProductEntity entity = productJpaRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        entity.updateImageUrl(imageUrl);
+        return toProduct(entity);
     }
 
     private Product toProduct(ProductEntity e) {
@@ -116,6 +119,7 @@ public class ProductRepositoryImpl implements ProductRepository {
                 e.getMinStockLevel(),
                 e.getCurrentStock(),
                 e.getQrCode(),
+                e.getImageUrl(),
                 e.getCreatedAt()
         );
     }

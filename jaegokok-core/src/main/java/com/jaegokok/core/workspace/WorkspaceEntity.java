@@ -31,6 +31,21 @@ public class WorkspaceEntity extends BaseEntity {
     @Column(nullable = false)
     private WorkspacePlan plan = WorkspacePlan.FREE;
 
+    @Column(length = 200)
+    private String companyName;
+
+    @Column(length = 50)
+    private String businessNumber;
+
+    @Column(length = 500)
+    private String address;
+
+    @Column(length = 50)
+    private String phone;
+
+    @Column(length = 500)
+    private String logoUrl;
+
 
     @Builder
     private WorkspaceEntity(MemberEntity owner, String name, String description, WorkspacePlan plan) {
@@ -53,8 +68,14 @@ public class WorkspaceEntity extends BaseEntity {
         this.plan = plan;
     }
 
+    public void updateProfile(String companyName, String businessNumber, String address, String phone) {
+        if (companyName != null) this.companyName = companyName;
+        if (businessNumber != null) this.businessNumber = businessNumber;
+        if (address != null) this.address = address;
+        if (phone != null) this.phone = phone;
+    }
 
-
-
-
+    public void updateLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
 }

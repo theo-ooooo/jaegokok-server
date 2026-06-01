@@ -18,3 +18,9 @@ server:
 qr:
   base-url: http://localhost:3000/scan
   # font-path: /path/to/NotoSansKR-Regular.ttf  # 한글 폰트 경로 (미설정 시 Latin-1 폴백)
+
+s3:
+  bucket: ${S3_BUCKET:jaegokok-dev}
+  region: ${S3_REGION:ap-northeast-2}
+  access-key: ${AWS_ACCESS_KEY:}
+  secret-key: ${AWS_SECRET_KEY:}

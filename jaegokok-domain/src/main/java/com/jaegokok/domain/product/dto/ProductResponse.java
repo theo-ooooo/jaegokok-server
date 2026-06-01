@@ -17,6 +17,7 @@ public record ProductResponse(
         int minStockLevel,
         int currentStock,
         String qrCode,
+        String imageUrl,
         LocalDateTime createdAt
 ) {
     public static ProductResponse from(Product product) {
@@ -32,6 +33,7 @@ public record ProductResponse(
                 product.minStockLevel(),
                 product.currentStock(),
                 product.qrCode(),
+                product.imageUrl(),
                 product.createdAt()
         );
     }

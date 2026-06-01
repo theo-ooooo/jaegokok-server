@@ -1,6 +1,7 @@
 package com.jaegokok.api.product;
 
 import com.jaegokok.api.security.UserPrincipal;
+import com.jaegokok.api.util.FileValidator;
 import com.jaegokok.common.response.GlobalResponse;
 import com.jaegokok.domain.inventory.ScanService;
 import com.jaegokok.domain.inventory.dto.StockResponse;
@@ -22,7 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -111,5 +114,16 @@ public class ProductController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"qr-bulk.pdf\"")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
+    }
+
+    @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public GlobalResponse<ProductResponse> uploadImage(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id,
+            @RequestPart MultipartFile file
+    ) throws IOException {
+        FileValidator.validateImage(file);
+        return GlobalResponse.success(HttpStatus.OK.value(),
+                productService.uploadImage(principal.getId(), id, FileValidator.safeFilename(file), file.getBytes(), file.getContentType()));
     }
 }
