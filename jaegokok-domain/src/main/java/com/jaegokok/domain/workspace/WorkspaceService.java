@@ -30,15 +30,19 @@ public class WorkspaceService {
     private final FileUploadPort fileUploadPort;
     private final ImageRepository imageRepository;
 
+    @Transactional(readOnly = true)
     public WorkspaceResponse getMyWorkspace(Long memberId) {
-        return WorkspaceResponse.from(workspaceRepository.findByOwnerId(memberId)
+        WorkspaceMember membership = workspaceMemberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        return WorkspaceResponse.from(workspaceRepository.findById(membership.workspaceId())
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND)));
     }
 
+    @Transactional(readOnly = true)
     public List<WorkspaceMemberResponse> listMembers(Long requesterId) {
-        Workspace workspace = workspaceRepository.findByOwnerId(requesterId)
+        WorkspaceMember membership = workspaceMemberRepository.findByMemberId(requesterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        return workspaceMemberRepository.findByWorkspaceId(workspace.id()).stream()
+        return workspaceMemberRepository.findByWorkspaceId(membership.workspaceId()).stream()
                 .map(wm -> {
                     Member member = memberRepository.findById(wm.memberId());
                     return new WorkspaceMemberResponse(
@@ -62,6 +66,12 @@ public class WorkspaceService {
         if (!wm.workspaceId().equals(workspace.id())) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
+        if (request.role() == WorkspaceMemberRole.OWNER) {
+            throw new CustomException(ErrorCode.CANNOT_CHANGE_OWNER_ROLE);
+        }
+        if (wm.role() == WorkspaceMemberRole.OWNER) {
+            throw new CustomException(ErrorCode.CANNOT_CHANGE_OWNER_ROLE);
+        }
         WorkspaceMember updated = workspaceMemberRepository.updateRole(workspaceMemberId, request.role());
         Member member = memberRepository.findById(updated.memberId());
         return new WorkspaceMemberResponse(
@@ -82,6 +92,9 @@ public class WorkspaceService {
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         if (!wm.workspaceId().equals(workspace.id())) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
+        }
+        if (wm.memberId().equals(requesterId)) {
+            throw new CustomException(ErrorCode.CANNOT_REMOVE_SELF);
         }
         workspaceMemberRepository.deleteById(workspaceMemberId);
     }

@@ -26,6 +26,8 @@ public enum ErrorCode {
     WORKSPACE_NOT_FOUND(HttpStatus.NOT_FOUND, "워크스페이스를 찾을 수 없습니다."),
     WORKSPACE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 워크스페이스에 접근 권한이 없습니다."),
     WORKSPACE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 워크스페이스가 존재합니다."),
+    CANNOT_REMOVE_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 삭제할 수 없습니다."),
+    CANNOT_CHANGE_OWNER_ROLE(HttpStatus.BAD_REQUEST, "OWNER 역할은 변경하거나 부여할 수 없습니다."),
 
     // Product
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),

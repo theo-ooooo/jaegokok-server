@@ -9,6 +9,7 @@ public interface WorkspaceMemberRepository {
     WorkspaceMember save(Long workspaceId, Long memberId, WorkspaceMemberRole role);
     List<WorkspaceMember> findByWorkspaceId(Long workspaceId);
     Optional<WorkspaceMember> findById(Long id);
+    Optional<WorkspaceMember> findByMemberId(Long memberId);
     Optional<WorkspaceMember> findByWorkspaceIdAndMemberId(Long workspaceId, Long memberId);
     WorkspaceMember updateRole(Long id, WorkspaceMemberRole role);
     void deleteById(Long id);

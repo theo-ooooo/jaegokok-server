@@ -44,12 +44,11 @@ public class MemberController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public GlobalResponse<Void> removeMember(
+    public void removeMember(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Long id
     ) {
         workspaceService.removeMember(principal.getId(), id);
-        return GlobalResponse.success(HttpStatus.NO_CONTENT.value(), null);
     }
 
     @DeleteMapping("/me")
