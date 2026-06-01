@@ -1,6 +1,7 @@
 package com.jaegokok.domain.workspace;
 
 import com.jaegokok.core.workspace.WorkspacePlan;
+import com.jaegokok.domain.image.Image;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +15,6 @@ public record Workspace(
         String businessNumber,
         String address,
         String phone,
-        String logoUrl,
+        Image logo,
         LocalDateTime createdAt
 ) {}

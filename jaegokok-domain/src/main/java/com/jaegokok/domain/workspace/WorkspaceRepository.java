@@ -12,5 +12,4 @@ public interface WorkspaceRepository {
     List<Workspace> findAllByMemberId(Long memberId);
     boolean existsByOwnerId(Long ownerId);
     Workspace updateProfile(Long ownerId, String companyName, String businessNumber, String address, String phone);
-    Workspace updateLogoUrl(Long ownerId, String logoUrl);
 }

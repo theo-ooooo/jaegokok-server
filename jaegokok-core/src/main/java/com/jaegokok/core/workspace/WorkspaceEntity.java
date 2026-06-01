@@ -43,10 +43,6 @@ public class WorkspaceEntity extends BaseEntity {
     @Column(length = 50)
     private String phone;
 
-    @Column(length = 500)
-    private String logoUrl;
-
-
     @Builder
     private WorkspaceEntity(MemberEntity owner, String name, String description, WorkspacePlan plan) {
         this.owner = owner;
@@ -75,7 +71,4 @@ public class WorkspaceEntity extends BaseEntity {
         if (phone != null) this.phone = phone;
     }
 
-    public void updateLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
-    }
 }

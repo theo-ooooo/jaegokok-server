@@ -2,8 +2,10 @@ package com.jaegokok.domain.product;
 
 import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
+import com.jaegokok.core.image.ImageEntityType;
 import com.jaegokok.core.workspace.WorkspacePlan;
 import com.jaegokok.domain.file.FileUploadPort;
+import com.jaegokok.domain.image.ImageRepository;
 import com.jaegokok.domain.product.dto.CreateProductRequest;
 import com.jaegokok.domain.product.dto.ProductResponse;
 import com.jaegokok.domain.product.dto.ProductSearchCondition;
@@ -35,6 +37,7 @@ public class ProductService {
     private final WorkspaceRepository workspaceRepository;
     private final QrCodePort qrCodePort;
     private final FileUploadPort fileUploadPort;
+    private final ImageRepository imageRepository;
 
     @Transactional
     public ProductResponse create(Long memberId, CreateProductRequest request) {
@@ -120,8 +123,11 @@ public class ProductService {
         if (!product.workspaceId().equals(workspace.id())) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
-        String imageUrl = fileUploadPort.upload("products", originalFilename, content, contentType);
-        return ProductResponse.from(productRepository.updateImageUrl(productId, imageUrl));
+        String originalPath = fileUploadPort.upload("products/" + productId + "/original", originalFilename, content, contentType);
+        imageRepository.deleteByEntity(ImageEntityType.PRODUCT, productId);
+        imageRepository.save(ImageEntityType.PRODUCT, productId, originalPath, null, fileUploadPort.getBucket());
+        return ProductResponse.from(productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)));
     }
 
     private Workspace getOwnerWorkspace(Long memberId) {

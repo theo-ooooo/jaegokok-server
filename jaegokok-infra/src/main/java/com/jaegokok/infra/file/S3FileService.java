@@ -34,6 +34,11 @@ public class S3FileService implements FileUploadPort {
         return "https://" + s3Properties.bucket() + ".s3." + s3Properties.region() + ".amazonaws.com/" + key;
     }
 
+    @Override
+    public String getBucket() {
+        return s3Properties.bucket();
+    }
+
     private String extractExtension(String filename) {
         int idx = filename.lastIndexOf('.');
         return idx >= 0 ? filename.substring(idx + 1).toLowerCase() : "bin";

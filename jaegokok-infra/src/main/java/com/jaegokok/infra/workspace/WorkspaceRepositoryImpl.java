@@ -2,11 +2,14 @@ package com.jaegokok.infra.workspace;
 
 import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
+import com.jaegokok.core.image.ImageEntityType;
 import com.jaegokok.core.member.MemberEntity;
 import com.jaegokok.core.workspace.WorkspaceEntity;
 import com.jaegokok.core.workspace.WorkspacePlan;
+import com.jaegokok.domain.image.Image;
 import com.jaegokok.domain.workspace.Workspace;
 import com.jaegokok.domain.workspace.WorkspaceRepository;
+import com.jaegokok.infra.image.ImageJpaRepository;
 import com.jaegokok.infra.member.MemberJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -20,6 +23,7 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
     private final WorkspaceJpaRepository workspaceJpaRepository;
     private final WorkspaceQueryRepository workspaceQueryRepository;
     private final MemberJpaRepository memberJpaRepository;
+    private final ImageJpaRepository imageJpaRepository;
 
     @Override
     public Workspace save(Long ownerId, String name, String description, WorkspacePlan plan) {
@@ -58,28 +62,12 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
         return toWorkspace(entity);
     }
 
-    @Override
-    public Workspace updateLogoUrl(Long ownerId, String logoUrl) {
-        WorkspaceEntity entity = workspaceJpaRepository.findByOwner_Id(ownerId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        entity.updateLogoUrl(logoUrl);
-        return toWorkspace(entity);
-    }
-
     private Workspace toWorkspace(WorkspaceEntity e) {
-        return new Workspace(
-                e.getId(),
-                e.getOwner().getId(),
-                e.getName(),
-                e.getDescription(),
-                e.getPlan(),
-                e.getCompanyName(),
-                e.getBusinessNumber(),
-                e.getAddress(),
-                e.getPhone(),
-                e.getLogoUrl(),
-                e.getCreatedAt()
-        );
+        Image logo = imageJpaRepository.findFirstByEntityTypeAndEntityId(ImageEntityType.WORKSPACE, e.getId())
+                .map(img -> new Image(img.getId(), img.getEntityType(), img.getEntityId(), img.getOriginalPath(), img.getWebpPath(), img.getBucket(), img.getCreatedAt()))
+                .orElse(null);
+        return new Workspace(e.getId(), e.getOwner().getId(), e.getName(), e.getDescription(), e.getPlan(),
+                e.getCompanyName(), e.getBusinessNumber(), e.getAddress(), e.getPhone(), logo, e.getCreatedAt());
     }
 
 }
