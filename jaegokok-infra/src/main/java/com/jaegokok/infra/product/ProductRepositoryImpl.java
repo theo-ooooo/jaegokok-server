@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -45,6 +46,18 @@ public class ProductRepositoryImpl implements ProductRepository {
     @Override
     public Optional<Product> findById(Long id) {
         return productJpaRepository.findById(id).map(this::toProduct);
+    }
+
+    @Override
+    public Optional<Product> findByQrCode(String qrCode) {
+        return productJpaRepository.findByQrCode(qrCode).map(this::toProduct);
+    }
+
+    @Override
+    public List<Product> findAllByIds(List<Long> ids) {
+        return productJpaRepository.findAllByIdIn(ids).stream()
+                .map(this::toProduct)
+                .toList();
     }
 
     @Override

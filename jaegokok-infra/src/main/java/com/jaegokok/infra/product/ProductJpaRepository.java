@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ProductJpaRepository extends JpaRepository<ProductEntity, Long> {
@@ -15,4 +16,6 @@ public interface ProductJpaRepository extends JpaRepository<ProductEntity, Long>
     @Modifying
     @Query("UPDATE ProductEntity p SET p.currentStock = p.currentStock + :delta WHERE p.id = :id")
     void adjustStock(@Param("id") Long id, @Param("delta") int delta);
+
+    List<ProductEntity> findAllByIdIn(List<Long> ids);
 }

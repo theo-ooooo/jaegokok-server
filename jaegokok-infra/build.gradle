@@ -27,5 +27,8 @@ dependencies {
     implementation 'com.google.zxing:core:3.5.3'
     implementation 'com.google.zxing:javase:3.5.3'
 
+    // PDF 생성
+    implementation 'org.apache.pdfbox:pdfbox:3.0.4'
+
     runtimeOnly 'com.mysql:mysql-connector-j'
 }

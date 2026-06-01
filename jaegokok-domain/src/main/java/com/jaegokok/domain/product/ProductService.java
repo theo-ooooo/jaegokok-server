@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -31,6 +32,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final WorkspaceRepository workspaceRepository;
+    private final QrCodePort qrCodePort;
 
     @Transactional
     public ProductResponse create(Long memberId, CreateProductRequest request) {
@@ -79,6 +81,30 @@ public class ProductService {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
         productRepository.deleteById(productId);
+    }
+
+    public byte[] downloadQrPng(Long memberId, Long productId) {
+        Workspace workspace = getOwnerWorkspace(memberId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        if (!product.workspaceId().equals(workspace.id())) {
+            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
+        }
+        return qrCodePort.generateQrPng(product.qrCode());
+    }
+
+    public byte[] downloadBulkQrPdf(Long memberId, List<Long> productIds) {
+        Workspace workspace = getOwnerWorkspace(memberId);
+        List<Product> products = productRepository.findAllByIds(productIds);
+        products.forEach(product -> {
+            if (!product.workspaceId().equals(workspace.id())) {
+                throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
+            }
+        });
+        List<QrItem> items = products.stream()
+                .map(p -> new QrItem(p.qrCode(), p.name()))
+                .toList();
+        return qrCodePort.generateBulkQrPdf(items);
     }
 
     private Workspace getOwnerWorkspace(Long memberId) {
