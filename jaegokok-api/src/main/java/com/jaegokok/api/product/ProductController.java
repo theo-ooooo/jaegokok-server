@@ -10,17 +10,25 @@ import com.jaegokok.domain.product.dto.ProductResponse;
 import com.jaegokok.domain.product.dto.ProductSearchCondition;
 import com.jaegokok.domain.product.dto.UpdateProductRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
+@Validated
 public class ProductController {
 
     private final ProductService productService;
@@ -79,5 +87,29 @@ public class ProductController {
             @PathVariable Long id
     ) {
         return GlobalResponse.success(HttpStatus.OK.value(), scanService.getStock(id, principal.getId()));
+    }
+
+    @GetMapping("/{id}/qr")
+    public ResponseEntity<byte[]> downloadQrPng(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long id
+    ) {
+        byte[] png = productService.downloadQrPng(principal.getId(), id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"qr-" + id + ".png\"")
+                .contentType(MediaType.IMAGE_PNG)
+                .body(png);
+    }
+
+    @GetMapping("/qr")
+    public ResponseEntity<byte[]> downloadBulkQrPdf(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam @Size(min = 1, max = 50) List<Long> ids
+    ) {
+        byte[] pdf = productService.downloadBulkQrPdf(principal.getId(), ids);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"qr-bulk.pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 }
