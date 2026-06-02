@@ -16,6 +16,7 @@ import com.jaegokok.domain.workspace.dto.UpdateWorkspaceProfileRequest;
 import com.jaegokok.domain.workspace.dto.WorkspaceMemberResponse;
 import com.jaegokok.domain.workspace.dto.WorkspaceResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,9 @@ public class WorkspaceService {
     private final WorkspaceTrialRepository workspaceTrialRepository;
     private final WorkspaceInvitationRepository workspaceInvitationRepository;
     private final EmailPort emailPort;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     @Transactional(readOnly = true)
     public WorkspaceResponse getMyWorkspace(Long memberId) {
@@ -121,12 +125,12 @@ public class WorkspaceService {
     @Transactional
     public void inviteMember(Long inviterId, String email) {
         Workspace workspace = workspaceRepository.findByOwnerId(inviterId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED));
         if (workspaceMemberRepository.existsByWorkspaceIdAndEmail(workspace.id(), email)) {
             throw new CustomException(ErrorCode.WORKSPACE_MEMBER_ALREADY_EXISTS);
         }
         WorkspaceInvitation invitation = workspaceInvitationRepository.save(workspace.id(), email);
-        String inviteUrl = "https://jaegokok.com/signup?invite=" + invitation.token();
+        String inviteUrl = baseUrl + "/signup?invite=" + invitation.token();
         emailPort.sendInvitation(email, inviteUrl);
     }
 
@@ -144,10 +148,12 @@ public class WorkspaceService {
         if (!invitation.email().equalsIgnoreCase(member.email())) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
+        if (!workspaceInvitationRepository.markUsedByToken(token)) {
+            throw new CustomException(ErrorCode.INVITATION_ALREADY_USED);
+        }
         if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(invitation.workspaceId(), memberId)) {
             workspaceMemberRepository.save(invitation.workspaceId(), memberId, WorkspaceMemberRole.EMPLOYEE);
         }
-        workspaceInvitationRepository.markUsed(invitation.id());
     }
 
     @Transactional

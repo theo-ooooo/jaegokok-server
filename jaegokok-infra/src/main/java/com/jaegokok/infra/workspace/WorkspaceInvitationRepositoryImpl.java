@@ -36,6 +36,11 @@ public class WorkspaceInvitationRepositoryImpl implements WorkspaceInvitationRep
         workspaceInvitationJpaRepository.save(entity);
     }
 
+    @Override
+    public boolean markUsedByToken(String token) {
+        return workspaceInvitationJpaRepository.markUsedByToken(token) > 0;
+    }
+
     private WorkspaceInvitation toWorkspaceInvitation(WorkspaceInvitationEntity e) {
         return new WorkspaceInvitation(
                 e.getId(),

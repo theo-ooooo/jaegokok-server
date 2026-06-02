@@ -6,4 +6,5 @@ public interface WorkspaceInvitationRepository {
     WorkspaceInvitation save(Long workspaceId, String email);
     Optional<WorkspaceInvitation> findByToken(String token);
     void markUsed(Long id);
+    boolean markUsedByToken(String token);
 }
