@@ -5,6 +5,7 @@ import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.core.inventory.InventoryType;
 import com.jaegokok.domain.dashboard.dto.DashboardResponse;
 import com.jaegokok.domain.dashboard.dto.LowStockProduct;
+import com.jaegokok.domain.workspace.WorkspaceMemberRepository;
 import com.jaegokok.domain.workspace.WorkspaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,9 +24,12 @@ public class DashboardService {
 
     private final DashboardRepository dashboardRepository;
     private final WorkspaceRepository workspaceRepository;
+    private final WorkspaceMemberRepository workspaceMemberRepository;
 
     public DashboardResponse getDashboard(Long memberId) {
         Long workspaceId = workspaceRepository.findByOwnerId(memberId)
+                .or(() -> workspaceMemberRepository.findByMemberId(memberId)
+                        .flatMap(wm -> workspaceRepository.findById(wm.workspaceId())))
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND))
                 .id();
 
