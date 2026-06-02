@@ -14,4 +14,5 @@ public interface WorkspaceMemberRepository {
     WorkspaceMember updateRole(Long id, WorkspaceMemberRole role);
     void deleteById(Long id);
     boolean existsByWorkspaceIdAndMemberId(Long workspaceId, Long memberId);
+    boolean existsByWorkspaceIdAndEmail(Long workspaceId, String email);
 }

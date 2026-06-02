@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface WorkspaceMemberQueryRepository {
     List<WorkspaceMemberEntity> findByWorkspaceId(Long workspaceId);
     Optional<WorkspaceMemberEntity> findByWorkspaceIdAndMemberId(Long workspaceId, Long memberId);
+    boolean existsByWorkspaceIdAndEmail(Long workspaceId, String email);
 }

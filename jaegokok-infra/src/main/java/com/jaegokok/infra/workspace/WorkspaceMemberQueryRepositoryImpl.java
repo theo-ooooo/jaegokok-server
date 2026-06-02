@@ -37,4 +37,17 @@ public class WorkspaceMemberQueryRepositoryImpl implements WorkspaceMemberQueryR
                         .fetchOne()
         );
     }
+
+    @Override
+    public boolean existsByWorkspaceIdAndEmail(Long workspaceId, String email) {
+        QWorkspaceMemberEntity wm = QWorkspaceMemberEntity.workspaceMemberEntity;
+        return queryFactory
+                .selectOne()
+                .from(wm)
+                .where(
+                        wm.workspace.id.eq(workspaceId),
+                        wm.member.email.eq(email)
+                )
+                .fetchFirst() != null;
+    }
 }
