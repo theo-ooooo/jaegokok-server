@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public record WorkspaceResponse(
         Long id,
+        Long ownerId,
         String name,
         String description,
         WorkspacePlan plan,
@@ -26,6 +27,7 @@ public record WorkspaceResponse(
         int trialDaysLeft = trial.map(WorkspaceTrial::daysLeft).orElse(0);
         return new WorkspaceResponse(
                 workspace.id(),
+                workspace.ownerId(),
                 workspace.name(),
                 workspace.description(),
                 workspace.plan(),
