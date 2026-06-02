@@ -27,6 +27,8 @@ public enum ErrorCode {
     WORKSPACE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 워크스페이스에 접근 권한이 없습니다."),
     WORKSPACE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 워크스페이스가 존재합니다."),
     WORKSPACE_MEMBER_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 워크스페이스에 소속된 회원입니다."),
+    CANNOT_REMOVE_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 삭제할 수 없습니다."),
+    CANNOT_CHANGE_OWNER_ROLE(HttpStatus.BAD_REQUEST, "OWNER 역할은 변경하거나 부여할 수 없습니다."),
 
     // Billing
     TRIAL_ALREADY_STARTED(HttpStatus.CONFLICT, "이미 무료 체험이 진행 중입니다."),

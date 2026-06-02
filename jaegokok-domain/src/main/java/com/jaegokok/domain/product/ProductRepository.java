@@ -18,5 +18,6 @@ public interface ProductRepository {
     Product update(Long productId, UpdateProductRequest request);
     void deleteById(Long id);
     void adjustStock(Long productId, int delta);
+    int adjustStockOut(Long productId, int quantity);
     List<Product> findAllByIds(List<Long> ids);
 }

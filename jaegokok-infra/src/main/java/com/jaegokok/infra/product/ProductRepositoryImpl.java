@@ -102,6 +102,12 @@ public class ProductRepositoryImpl implements ProductRepository {
         productJpaRepository.adjustStock(productId, delta);
     }
 
+    @Override
+    @Transactional
+    public int adjustStockOut(Long productId, int quantity) {
+        return productJpaRepository.adjustStockOut(productId, quantity);
+    }
+
     private Product toProduct(ProductEntity e) {
         List<Image> images = imageJpaRepository.findByEntityTypeAndEntityId(ImageEntityType.PRODUCT, e.getId())
                 .stream().map(img -> new Image(img.getId(), img.getEntityType(), img.getEntityId(), img.getOriginalPath(), img.getWebpPath(), img.getBucket(), img.getCreatedAt()))
