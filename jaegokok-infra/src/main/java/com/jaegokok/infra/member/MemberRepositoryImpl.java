@@ -40,6 +40,13 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
+    public Optional<Member> findByIdOptional(Long id) {
+        return memberJpaRepository.findById(id)
+                .filter(e -> e.getStatus() != MemberStatus.WITHDRAWN)
+                .map(this::toMember);
+    }
+
+    @Override
     public void withdraw(Long id) {
         MemberEntity entity = memberJpaRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));

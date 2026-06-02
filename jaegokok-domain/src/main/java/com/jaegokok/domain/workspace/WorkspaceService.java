@@ -46,17 +46,16 @@ public class WorkspaceService {
         WorkspaceMember membership = workspaceMemberRepository.findByMemberId(requesterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
         return workspaceMemberRepository.findByWorkspaceId(membership.workspaceId()).stream()
-                .map(wm -> {
-                    Member member = memberRepository.findById(wm.memberId());
-                    return new WorkspaceMemberResponse(
-                            wm.id(),
-                            member.id(),
-                            member.nickname(),
-                            member.email(),
-                            wm.role(),
-                            member.status()
-                    );
-                })
+                .flatMap(wm -> memberRepository.findByIdOptional(wm.memberId())
+                        .map(member -> new WorkspaceMemberResponse(
+                                wm.id(),
+                                member.id(),
+                                member.nickname(),
+                                member.email(),
+                                wm.role(),
+                                member.status()
+                        ))
+                        .stream())
                 .toList();
     }
 

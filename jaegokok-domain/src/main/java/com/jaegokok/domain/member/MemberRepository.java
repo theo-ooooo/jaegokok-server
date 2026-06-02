@@ -10,6 +10,8 @@ public interface MemberRepository {
 
     Member findById(Long id);
 
+    Optional<Member> findByIdOptional(Long id);
+
     void withdraw(Long id);
 
     boolean existsByEmail(String email);
