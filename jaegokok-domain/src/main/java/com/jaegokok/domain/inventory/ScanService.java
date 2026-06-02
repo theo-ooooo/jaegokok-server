@@ -67,7 +67,11 @@ public class ScanService {
 
     public PublicScanResponse getProductByQrCode(String qrCode) {
         Product product = findByQrCodeOrThrow(qrCode);
-        return new PublicScanResponse(product.id(), product.name(), product.qrCode(), product.workspaceId());
+        String imageUrl = (product.images() != null && !product.images().isEmpty())
+                ? product.images().get(0).originalPath()
+                : null;
+        return new PublicScanResponse(product.id(), product.name(), product.qrCode(), product.workspaceId(),
+                product.currentStock(), imageUrl);
     }
 
     private Product findByQrCodeOrThrow(String qrCode) {
