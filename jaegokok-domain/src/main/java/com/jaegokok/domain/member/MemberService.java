@@ -9,6 +9,7 @@ import com.jaegokok.domain.member.dto.LoginRequest;
 import com.jaegokok.domain.member.dto.LoginResult;
 import com.jaegokok.domain.member.dto.MemberResponse;
 import com.jaegokok.domain.member.dto.SignUpRequest;
+import com.jaegokok.domain.workspace.WorkspaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,14 +24,23 @@ public class MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
+    private final WorkspaceService workspaceService;
 
     @Transactional
     public MemberResponse signUp(SignUpRequest request) {
         if (memberRepository.existsByEmail(request.email())) {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
+        // 초대 토큰 사전 검증 (가입 전에 실패해야 함)
+        if (request.inviteToken() != null && !request.inviteToken().isBlank()) {
+            workspaceService.validateInvitation(request.inviteToken(), request.email());
+        }
         String encodedPassword = passwordEncoder.encode(request.password());
         Member member = memberRepository.register(request.email(), encodedPassword, request.nickname());
+        // 초대 수락 (가입과 동일 트랜잭션)
+        if (request.inviteToken() != null && !request.inviteToken().isBlank()) {
+            workspaceService.acceptInvitation(request.inviteToken(), member.id());
+        }
         return MemberResponse.from(member);
     }
 

@@ -134,6 +134,15 @@ public class WorkspaceService {
         emailPort.sendInvitation(email, inviteUrl);
     }
 
+    @Transactional(readOnly = true)
+    public void validateInvitation(String token, String email) {
+        WorkspaceInvitation invitation = workspaceInvitationRepository.findByToken(token)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVITATION_NOT_FOUND));
+        if (invitation.used()) throw new CustomException(ErrorCode.INVITATION_ALREADY_USED);
+        if (invitation.isExpired()) throw new CustomException(ErrorCode.INVITATION_EXPIRED);
+        if (!invitation.email().equalsIgnoreCase(email)) throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
+    }
+
     @Transactional
     public void acceptInvitation(String token, Long memberId) {
         WorkspaceInvitation invitation = workspaceInvitationRepository.findByToken(token)
