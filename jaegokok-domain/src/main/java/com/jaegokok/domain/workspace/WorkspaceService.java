@@ -45,7 +45,7 @@ public class WorkspaceService {
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
         Workspace workspace = workspaceRepository.findById(membership.workspaceId())
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        return WorkspaceResponse.from(workspace, workspaceTrialRepository.findByWorkspaceId(workspace.id()));
+        return WorkspaceResponse.from(workspace, workspaceTrialRepository.findByWorkspaceId(workspace.id()), membership);
     }
 
     @Transactional(readOnly = true)
