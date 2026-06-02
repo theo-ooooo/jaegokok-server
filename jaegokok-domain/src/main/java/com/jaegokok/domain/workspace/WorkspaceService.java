@@ -122,9 +122,6 @@ public class WorkspaceService {
     public void inviteMember(Long inviterId, String email) {
         Workspace workspace = workspaceRepository.findByOwnerId(inviterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        if (!workspace.ownerId().equals(inviterId)) {
-            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
-        }
         if (workspaceMemberRepository.existsByWorkspaceIdAndEmail(workspace.id(), email)) {
             throw new CustomException(ErrorCode.WORKSPACE_MEMBER_ALREADY_EXISTS);
         }
@@ -142,6 +139,10 @@ public class WorkspaceService {
         }
         if (invitation.isExpired()) {
             throw new CustomException(ErrorCode.INVITATION_EXPIRED);
+        }
+        Member member = memberRepository.findById(memberId);
+        if (!invitation.email().equalsIgnoreCase(member.email())) {
+            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
         if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(invitation.workspaceId(), memberId)) {
             workspaceMemberRepository.save(invitation.workspaceId(), memberId, WorkspaceMemberRole.EMPLOYEE);

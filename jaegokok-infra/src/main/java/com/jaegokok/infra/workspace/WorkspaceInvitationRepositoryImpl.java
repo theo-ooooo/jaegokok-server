@@ -33,6 +33,7 @@ public class WorkspaceInvitationRepositoryImpl implements WorkspaceInvitationRep
         WorkspaceInvitationEntity entity = workspaceInvitationJpaRepository.findById(id)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVITATION_NOT_FOUND));
         entity.markUsed();
+        workspaceInvitationJpaRepository.save(entity);
     }
 
     private WorkspaceInvitation toWorkspaceInvitation(WorkspaceInvitationEntity e) {
