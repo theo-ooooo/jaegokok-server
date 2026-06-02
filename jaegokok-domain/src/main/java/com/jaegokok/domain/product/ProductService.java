@@ -12,6 +12,7 @@ import com.jaegokok.domain.product.dto.ProductSearchCondition;
 import com.jaegokok.domain.product.dto.UpdateProductRequest;
 import com.jaegokok.domain.workspace.Workspace;
 import com.jaegokok.domain.workspace.WorkspaceRepository;
+import com.jaegokok.domain.workspace.WorkspaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final WorkspaceRepository workspaceRepository;
+    private final WorkspaceService workspaceService;
     private final QrCodePort qrCodePort;
     private final FileUploadPort fileUploadPort;
     private final ImageRepository imageRepository;
@@ -42,7 +44,8 @@ public class ProductService {
     @Transactional
     public ProductResponse create(Long memberId, CreateProductRequest request) {
         Workspace workspace = getOwnerWorkspace(memberId);
-        int limit = PLAN_LIMITS.getOrDefault(workspace.plan(), Integer.MAX_VALUE);
+        WorkspacePlan effectivePlan = workspaceService.getEffectivePlan(workspace.id());
+        int limit = PLAN_LIMITS.getOrDefault(effectivePlan, Integer.MAX_VALUE);
         if (productRepository.countByWorkspaceId(workspace.id()) >= limit) {
             throw new CustomException(ErrorCode.PRODUCT_LIMIT_EXCEEDED);
         }

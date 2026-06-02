@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,13 +33,15 @@ public class WorkspaceService {
     private final MemberRepository memberRepository;
     private final FileUploadPort fileUploadPort;
     private final ImageRepository imageRepository;
+    private final WorkspaceTrialRepository workspaceTrialRepository;
 
     @Transactional(readOnly = true)
     public WorkspaceResponse getMyWorkspace(Long memberId) {
         WorkspaceMember membership = workspaceMemberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        return WorkspaceResponse.from(workspaceRepository.findById(membership.workspaceId())
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND)));
+        Workspace workspace = workspaceRepository.findById(membership.workspaceId())
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        return WorkspaceResponse.from(workspace, workspaceTrialRepository.findByWorkspaceId(workspace.id()));
     }
 
     @Transactional(readOnly = true)
@@ -112,7 +115,7 @@ public class WorkspaceService {
         }
         Workspace workspace = workspaceRepository.save(memberId, request.name(), request.description(), WorkspacePlan.FREE);
         workspaceMemberRepository.save(workspace.id(), memberId, WorkspaceMemberRole.OWNER);
-        return WorkspaceResponse.from(workspace);
+        return WorkspaceResponse.from(workspace, Optional.empty());
     }
 
     @Transactional
@@ -137,8 +140,10 @@ public class WorkspaceService {
 
     @Transactional
     public WorkspaceResponse updateProfile(Long memberId, UpdateWorkspaceProfileRequest request) {
-        return WorkspaceResponse.from(workspaceRepository.updateProfile(
-                memberId, request.companyName(), request.businessNumber(), request.address(), request.phone()));
+        Workspace workspace = workspaceRepository.updateProfile(
+                memberId, request.companyName(), request.businessNumber(), request.address(), request.phone());
+        Optional<WorkspaceTrial> trial = workspaceTrialRepository.findByWorkspaceId(workspace.id());
+        return WorkspaceResponse.from(workspace, trial);
     }
 
     @Transactional
@@ -148,7 +153,36 @@ public class WorkspaceService {
         String originalPath = fileUploadPort.upload("workspaces/" + workspace.id() + "/logo", originalFilename, content, contentType);
         imageRepository.deleteByEntity(ImageEntityType.WORKSPACE, workspace.id());
         imageRepository.save(ImageEntityType.WORKSPACE, workspace.id(), originalPath, null, fileUploadPort.getBucket());
-        return WorkspaceResponse.from(workspaceRepository.findByOwnerId(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND)));
+        Workspace updated = workspaceRepository.findByOwnerId(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        Optional<WorkspaceTrial> trial = workspaceTrialRepository.findByWorkspaceId(updated.id());
+        return WorkspaceResponse.from(updated, trial);
+    }
+
+    @Transactional(readOnly = true)
+    public WorkspacePlan getEffectivePlan(Long workspaceId) {
+        Optional<WorkspaceTrial> trial = workspaceTrialRepository.findByWorkspaceId(workspaceId);
+        if (trial.isPresent() && !trial.get().isActive()) {
+            // Trial expired — downgrade back to FREE on the fly
+            return WorkspacePlan.FREE;
+        }
+        return workspaceRepository.findById(workspaceId)
+                .map(Workspace::plan)
+                .orElse(WorkspacePlan.FREE);
+    }
+
+    @Transactional
+    public WorkspaceResponse startTrial(Long memberId) {
+        Workspace workspace = workspaceRepository.findByOwnerId(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        if (workspaceTrialRepository.findByWorkspaceId(workspace.id()).isPresent()) {
+            throw new CustomException(ErrorCode.TRIAL_ALREADY_STARTED);
+        }
+        if (workspace.plan() != WorkspacePlan.FREE) {
+            throw new CustomException(ErrorCode.ALREADY_ON_PAID_PLAN);
+        }
+        WorkspaceTrial trial = workspaceTrialRepository.save(workspace.id());
+        workspaceRepository.updatePlan(workspace.id(), WorkspacePlan.PRO);
+        return WorkspaceResponse.from(workspace, Optional.of(trial));
     }
 }
