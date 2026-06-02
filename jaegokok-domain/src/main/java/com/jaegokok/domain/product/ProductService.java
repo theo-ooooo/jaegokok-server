@@ -10,6 +10,7 @@ import com.jaegokok.domain.product.dto.CreateProductRequest;
 import com.jaegokok.domain.product.dto.ProductResponse;
 import com.jaegokok.domain.product.dto.ProductSearchCondition;
 import com.jaegokok.domain.product.dto.UpdateProductRequest;
+import com.jaegokok.domain.subscription.SubscriptionPlanRepository;
 import com.jaegokok.domain.workspace.Workspace;
 import com.jaegokok.domain.workspace.WorkspaceMemberRepository;
 import com.jaegokok.domain.workspace.WorkspaceRepository;
@@ -21,19 +22,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ProductService {
-
-    private static final Map<WorkspacePlan, Integer> PLAN_LIMITS = Map.of(
-            WorkspacePlan.FREE, 50,
-            WorkspacePlan.BASIC, 500,
-            WorkspacePlan.PRO, Integer.MAX_VALUE
-    );
 
     private final ProductRepository productRepository;
     private final WorkspaceRepository workspaceRepository;
@@ -42,12 +36,15 @@ public class ProductService {
     private final QrCodePort qrCodePort;
     private final FileUploadPort fileUploadPort;
     private final ImageRepository imageRepository;
+    private final SubscriptionPlanRepository subscriptionPlanRepository;
 
     @Transactional
     public ProductResponse create(Long memberId, CreateProductRequest request) {
         Workspace workspace = getOwnerWorkspace(memberId);
         WorkspacePlan effectivePlan = workspaceService.getEffectivePlan(workspace.id());
-        int limit = PLAN_LIMITS.getOrDefault(effectivePlan, Integer.MAX_VALUE);
+        int limit = subscriptionPlanRepository.findByPlanKey(effectivePlan.name())
+                .map(sp -> sp.isUnlimitedProducts() ? Integer.MAX_VALUE : sp.productLimit())
+                .orElse(Integer.MAX_VALUE);
         if (productRepository.countByWorkspaceId(workspace.id()) >= limit) {
             throw new CustomException(ErrorCode.PRODUCT_LIMIT_EXCEEDED);
         }
