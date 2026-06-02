@@ -36,4 +36,16 @@ public class SubscriptionPlanEntity extends BaseEntity {
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
+
+    public static SubscriptionPlanEntity create(String planKey, String name, int priceKrw, int productLimit, int memberLimit, int historyDays) {
+        SubscriptionPlanEntity e = new SubscriptionPlanEntity();
+        e.planKey = planKey;
+        e.name = name;
+        e.priceKrw = priceKrw;
+        e.productLimit = productLimit;
+        e.memberLimit = memberLimit;
+        e.historyDays = historyDays;
+        e.isActive = true;
+        return e;
+    }
 }
