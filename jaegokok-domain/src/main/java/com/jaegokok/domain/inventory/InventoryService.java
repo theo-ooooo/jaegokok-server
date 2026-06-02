@@ -49,10 +49,10 @@ public class InventoryService {
     @Transactional
     public InventoryHistoryResponse recordOut(Long memberId, InventoryRecordRequest request) {
         Product product = findProductAndCheckAccess(memberId, request.productId());
-        if (product.currentStock() < request.quantity()) {
+        int updated = productRepository.adjustStockOut(product.id(), request.quantity());
+        if (updated == 0) {
             throw new CustomException(ErrorCode.INSUFFICIENT_STOCK);
         }
-        productRepository.adjustStock(product.id(), -request.quantity());
         InventoryRecord record = inventoryRecordRepository.save(
                 product.id(), InventoryType.OUT, request.quantity(), request.note(), memberId);
         return InventoryHistoryResponse.from(record);

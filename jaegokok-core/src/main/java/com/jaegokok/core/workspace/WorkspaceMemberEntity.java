@@ -9,7 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "workspace_members")
+@Table(name = "workspace_members",
+        uniqueConstraints = @UniqueConstraint(name = "uq_workspace_member", columnNames = {"workspace_id", "member_id"}))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WorkspaceMemberEntity {

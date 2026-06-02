@@ -44,7 +44,7 @@ public class WorkspaceMemberRepositoryImpl implements WorkspaceMemberRepository 
 
     @Override
     public Optional<WorkspaceMember> findByMemberId(Long memberId) {
-        return workspaceMemberJpaRepository.findByMember_Id(memberId)
+        return workspaceMemberJpaRepository.findFirstByMember_Id(memberId)
                 .map(this::toWorkspaceMember);
     }
 

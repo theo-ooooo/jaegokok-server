@@ -96,6 +96,9 @@ public class WorkspaceService {
         if (wm.memberId().equals(requesterId)) {
             throw new CustomException(ErrorCode.CANNOT_REMOVE_SELF);
         }
+        if (wm.role() == WorkspaceMemberRole.OWNER) {
+            throw new CustomException(ErrorCode.CANNOT_CHANGE_OWNER_ROLE);
+        }
         workspaceMemberRepository.deleteById(workspaceMemberId);
     }
 
