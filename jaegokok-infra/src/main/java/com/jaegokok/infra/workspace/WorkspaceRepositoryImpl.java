@@ -55,10 +55,10 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
     }
 
     @Override
-    public Workspace updateProfile(Long ownerId, String companyName, String businessNumber, String address, String phone) {
+    public Workspace updateProfile(Long ownerId, String name, String businessNumber, String address, String phone) {
         WorkspaceEntity entity = workspaceJpaRepository.findByOwner_Id(ownerId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        entity.updateProfile(companyName, businessNumber, address, phone);
+        entity.updateProfile(name, businessNumber, address, phone);
         return toWorkspace(entity);
     }
 
@@ -75,7 +75,7 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
                 .map(img -> new Image(img.getId(), img.getEntityType(), img.getEntityId(), img.getOriginalPath(), img.getWebpPath(), img.getBucket(), img.getCreatedAt()))
                 .orElse(null);
         return new Workspace(e.getId(), e.getOwner().getId(), e.getName(), e.getDescription(), e.getPlan(),
-                e.getCompanyName(), e.getBusinessNumber(), e.getAddress(), e.getPhone(), logo, e.getCreatedAt());
+                e.getBusinessNumber(), e.getAddress(), e.getPhone(), logo, e.getCreatedAt());
     }
 
 }

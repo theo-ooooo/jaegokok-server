@@ -31,9 +31,6 @@ public class WorkspaceEntity extends BaseEntity {
     @Column(nullable = false)
     private WorkspacePlan plan = WorkspacePlan.FREE;
 
-    @Column(length = 200)
-    private String companyName;
-
     @Column(length = 50)
     private String businessNumber;
 
@@ -64,8 +61,8 @@ public class WorkspaceEntity extends BaseEntity {
         this.plan = plan;
     }
 
-    public void updateProfile(String companyName, String businessNumber, String address, String phone) {
-        if (companyName != null) this.companyName = companyName;
+    public void updateProfile(String name, String businessNumber, String address, String phone) {
+        if (name != null) this.name = name;
         if (businessNumber != null) this.businessNumber = businessNumber;
         if (address != null) this.address = address;
         if (phone != null) this.phone = phone;
