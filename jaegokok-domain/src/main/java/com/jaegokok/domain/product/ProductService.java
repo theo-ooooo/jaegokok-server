@@ -11,6 +11,7 @@ import com.jaegokok.domain.product.dto.ProductResponse;
 import com.jaegokok.domain.product.dto.ProductSearchCondition;
 import com.jaegokok.domain.product.dto.UpdateProductRequest;
 import com.jaegokok.domain.workspace.Workspace;
+import com.jaegokok.domain.workspace.WorkspaceMemberRepository;
 import com.jaegokok.domain.workspace.WorkspaceRepository;
 import com.jaegokok.domain.workspace.WorkspaceService;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final WorkspaceRepository workspaceRepository;
+    private final WorkspaceMemberRepository workspaceMemberRepository;
     private final WorkspaceService workspaceService;
     private final QrCodePort qrCodePort;
     private final FileUploadPort fileUploadPort;
@@ -54,13 +56,13 @@ public class ProductService {
     }
 
     public Page<ProductResponse> findAll(Long memberId, ProductSearchCondition condition, Pageable pageable) {
-        Workspace workspace = getOwnerWorkspace(memberId);
+        Workspace workspace = getMemberWorkspace(memberId);
         return productRepository.findByWorkspaceId(workspace.id(), condition, pageable)
                 .map(ProductResponse::from);
     }
 
     public ProductResponse findById(Long memberId, Long productId) {
-        Workspace workspace = getOwnerWorkspace(memberId);
+        Workspace workspace = getMemberWorkspace(memberId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         if (!product.workspaceId().equals(workspace.id())) {
@@ -135,6 +137,13 @@ public class ProductService {
 
     private Workspace getOwnerWorkspace(Long memberId) {
         return workspaceRepository.findByOwnerId(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+    }
+
+    private Workspace getMemberWorkspace(Long memberId) {
+        return workspaceRepository.findByOwnerId(memberId)
+                .or(() -> workspaceMemberRepository.findByMemberId(memberId)
+                        .flatMap(wm -> workspaceRepository.findById(wm.workspaceId())))
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
     }
 }
