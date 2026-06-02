@@ -73,7 +73,7 @@ public class EmailAdapter implements EmailPort {
                       <td style="background:#F2F4F6;padding:20px 40px;border-top:1px solid #E5E8EB;text-align:center;">
                         <p style="margin:0;font-size:12px;color:#8B95A1;">
                           이 메일은 재고콕 워크스페이스 초대로 자동 발송됐습니다.<br>
-                          문의: <a href="mailto:hello@jaegokok.com" style="color:#3568F0;">hello@jaegokok.com</a>
+                          문의: <a href="mailto:help@jaegokok.com" style="color:#3568F0;">help@jaegokok.com</a>
                         </p>
                       </td>
                     </tr>
