@@ -6,6 +6,8 @@ import com.jaegokok.core.inventory.InventoryType;
 import com.jaegokok.domain.inventory.InventoryService;
 import com.jaegokok.domain.inventory.dto.InventoryHistoryCondition;
 import com.jaegokok.domain.inventory.dto.InventoryHistoryResponse;
+import com.jaegokok.domain.inventory.dto.InventoryRecordRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,5 +37,23 @@ public class InventoryController {
     ) {
         InventoryHistoryCondition condition = new InventoryHistoryCondition(productId, type, dateFrom, dateTo);
         return GlobalResponse.success(HttpStatus.OK.value(), inventoryService.getHistory(principal.getId(), condition, pageable));
+    }
+
+    @PostMapping("/in")
+    @ResponseStatus(HttpStatus.CREATED)
+    public GlobalResponse<InventoryHistoryResponse> recordIn(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody InventoryRecordRequest request
+    ) {
+        return GlobalResponse.success(HttpStatus.CREATED.value(), inventoryService.recordIn(principal.getId(), request));
+    }
+
+    @PostMapping("/out")
+    @ResponseStatus(HttpStatus.CREATED)
+    public GlobalResponse<InventoryHistoryResponse> recordOut(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody InventoryRecordRequest request
+    ) {
+        return GlobalResponse.success(HttpStatus.CREATED.value(), inventoryService.recordOut(principal.getId(), request));
     }
 }

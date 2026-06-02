@@ -17,5 +17,9 @@ public interface ProductJpaRepository extends JpaRepository<ProductEntity, Long>
     @Query("UPDATE ProductEntity p SET p.currentStock = p.currentStock + :delta WHERE p.id = :id")
     void adjustStock(@Param("id") Long id, @Param("delta") int delta);
 
+    @Modifying
+    @Query("UPDATE ProductEntity p SET p.currentStock = p.currentStock - :quantity WHERE p.id = :id AND p.currentStock >= :quantity")
+    int adjustStockOut(@Param("id") Long id, @Param("quantity") int quantity);
+
     List<ProductEntity> findAllByIdIn(List<Long> ids);
 }
