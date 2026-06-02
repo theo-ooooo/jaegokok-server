@@ -83,6 +83,18 @@ public class WorkspaceService {
         return WorkspaceResponse.from(updated, trial);
     }
 
+    @Transactional(readOnly = true)
+    public WorkspacePlan getEffectivePlan(Long workspaceId) {
+        Optional<WorkspaceTrial> trial = workspaceTrialRepository.findByWorkspaceId(workspaceId);
+        if (trial.isPresent() && !trial.get().isActive()) {
+            // Trial expired — downgrade back to FREE on the fly
+            return WorkspacePlan.FREE;
+        }
+        return workspaceRepository.findById(workspaceId)
+                .map(Workspace::plan)
+                .orElse(WorkspacePlan.FREE);
+    }
+
     @Transactional
     public WorkspaceResponse startTrial(Long memberId) {
         Workspace workspace = workspaceRepository.findByOwnerId(memberId)

@@ -1,7 +1,6 @@
 package com.jaegokok.domain.workspace;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 
 public record WorkspaceTrial(Long id, Long workspaceId, LocalDateTime startedAt, LocalDateTime endsAt) {
 
@@ -10,6 +9,8 @@ public record WorkspaceTrial(Long id, Long workspaceId, LocalDateTime startedAt,
     }
 
     public int daysLeft() {
-        return (int) Math.max(0, ChronoUnit.DAYS.between(LocalDateTime.now(), endsAt));
+        if (!isActive()) return 0;
+        long seconds = java.time.temporal.ChronoUnit.SECONDS.between(LocalDateTime.now(), endsAt);
+        return (int) Math.max(0, (seconds + 86399) / 86400); // ceiling division
     }
 }
