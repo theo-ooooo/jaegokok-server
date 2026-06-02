@@ -5,8 +5,6 @@ import com.jaegokok.common.response.GlobalResponse;
 import com.jaegokok.domain.member.MemberService;
 import com.jaegokok.domain.member.dto.MemberResponse;
 import com.jaegokok.domain.workspace.WorkspaceService;
-import com.jaegokok.domain.workspace.dto.InviteMemberRequest;
-import com.jaegokok.domain.workspace.dto.InviteMemberResponse;
 import com.jaegokok.domain.workspace.dto.UpdateMemberRoleRequest;
 import com.jaegokok.domain.workspace.dto.WorkspaceMemberResponse;
 import jakarta.validation.Valid;
@@ -37,11 +35,12 @@ public class MemberController {
 
     @PostMapping("/invite")
     @ResponseStatus(HttpStatus.CREATED)
-    public GlobalResponse<InviteMemberResponse> invite(
+    public GlobalResponse<Void> invite(
             @AuthenticationPrincipal UserPrincipal principal,
-            @Valid @RequestBody InviteMemberRequest request
+            @Valid @RequestBody InviteByEmailRequest request
     ) {
-        return GlobalResponse.success(HttpStatus.CREATED.value(), workspaceService.inviteMember(principal.getId(), request));
+        workspaceService.inviteMember(principal.getId(), request.email());
+        return GlobalResponse.success(HttpStatus.CREATED.value(), null);
     }
 
     @PatchMapping("/{id}")

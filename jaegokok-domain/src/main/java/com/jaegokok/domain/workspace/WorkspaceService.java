@@ -5,19 +5,18 @@ import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.core.image.ImageEntityType;
 import com.jaegokok.core.workspace.WorkspaceMemberRole;
 import com.jaegokok.core.workspace.WorkspacePlan;
+import com.jaegokok.domain.email.EmailPort;
 import com.jaegokok.domain.file.FileUploadPort;
 import com.jaegokok.domain.image.ImageRepository;
 import com.jaegokok.domain.member.Member;
 import com.jaegokok.domain.member.MemberRepository;
 import com.jaegokok.domain.workspace.dto.CreateWorkspaceRequest;
-import com.jaegokok.domain.workspace.dto.InviteMemberRequest;
-import com.jaegokok.domain.workspace.dto.InviteMemberResponse;
 import com.jaegokok.domain.workspace.dto.UpdateMemberRoleRequest;
 import com.jaegokok.domain.workspace.dto.UpdateWorkspaceProfileRequest;
 import com.jaegokok.domain.workspace.dto.WorkspaceMemberResponse;
 import com.jaegokok.domain.workspace.dto.WorkspaceResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +33,11 @@ public class WorkspaceService {
     private final FileUploadPort fileUploadPort;
     private final ImageRepository imageRepository;
     private final WorkspaceTrialRepository workspaceTrialRepository;
+    private final WorkspaceInvitationRepository workspaceInvitationRepository;
+    private final EmailPort emailPort;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     @Transactional(readOnly = true)
     public WorkspaceResponse getMyWorkspace(Long memberId) {
@@ -119,22 +123,36 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public InviteMemberResponse inviteMember(Long inviterId, InviteMemberRequest request) {
-        Workspace workspace = workspaceRepository.findById(request.workspaceId())
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        if (!workspace.ownerId().equals(inviterId)) {
+    public void inviteMember(Long inviterId, String email) {
+        Workspace workspace = workspaceRepository.findByOwnerId(inviterId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED));
+        if (workspaceMemberRepository.existsByWorkspaceIdAndEmail(workspace.id(), email)) {
+            throw new CustomException(ErrorCode.WORKSPACE_MEMBER_ALREADY_EXISTS);
+        }
+        WorkspaceInvitation invitation = workspaceInvitationRepository.save(workspace.id(), email);
+        String inviteUrl = baseUrl + "/signup?invite=" + invitation.token();
+        emailPort.sendInvitation(email, inviteUrl);
+    }
+
+    @Transactional
+    public void acceptInvitation(String token, Long memberId) {
+        WorkspaceInvitation invitation = workspaceInvitationRepository.findByToken(token)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVITATION_NOT_FOUND));
+        if (invitation.used()) {
+            throw new CustomException(ErrorCode.INVITATION_ALREADY_USED);
+        }
+        if (invitation.isExpired()) {
+            throw new CustomException(ErrorCode.INVITATION_EXPIRED);
+        }
+        Member member = memberRepository.findById(memberId);
+        if (!invitation.email().equalsIgnoreCase(member.email())) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
-        Member invitee = memberRepository.findByEmail(request.email())
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-        if (workspaceMemberRepository.existsByWorkspaceIdAndMemberId(request.workspaceId(), invitee.id())) {
-            throw new CustomException(ErrorCode.WORKSPACE_MEMBER_ALREADY_EXISTS);
+        if (!workspaceInvitationRepository.markUsedByToken(token)) {
+            throw new CustomException(ErrorCode.INVITATION_ALREADY_USED);
         }
-        try {
-            WorkspaceMember workspaceMember = workspaceMemberRepository.save(request.workspaceId(), invitee.id(), WorkspaceMemberRole.EMPLOYEE);
-            return InviteMemberResponse.from(workspaceMember);
-        } catch (DataIntegrityViolationException e) {
-            throw new CustomException(ErrorCode.WORKSPACE_MEMBER_ALREADY_EXISTS);
+        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(invitation.workspaceId(), memberId)) {
+            workspaceMemberRepository.save(invitation.workspaceId(), memberId, WorkspaceMemberRole.EMPLOYEE);
         }
     }
 

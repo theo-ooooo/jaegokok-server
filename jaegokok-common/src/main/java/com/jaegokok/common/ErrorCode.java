@@ -30,6 +30,11 @@ public enum ErrorCode {
     CANNOT_REMOVE_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 삭제할 수 없습니다."),
     CANNOT_CHANGE_OWNER_ROLE(HttpStatus.BAD_REQUEST, "OWNER 역할은 변경하거나 부여할 수 없습니다."),
 
+    // Invitation
+    INVITATION_NOT_FOUND(HttpStatus.NOT_FOUND, "초대를 찾을 수 없습니다."),
+    INVITATION_ALREADY_USED(HttpStatus.CONFLICT, "이미 사용된 초대입니다."),
+    INVITATION_EXPIRED(HttpStatus.BAD_REQUEST, "만료된 초대입니다."),
+
     // Billing
     TRIAL_ALREADY_STARTED(HttpStatus.CONFLICT, "이미 무료 체험이 진행 중입니다."),
     ALREADY_ON_PAID_PLAN(HttpStatus.CONFLICT, "이미 유료 플랜을 사용 중입니다."),

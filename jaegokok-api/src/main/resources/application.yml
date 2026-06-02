@@ -12,6 +12,7 @@ spring:
       - security
       - docs
       - s3
+      - mail
 
 server:
   port: 8080
@@ -20,3 +21,5 @@ qr:
   base-url: http://localhost:3000/scan
   # font-path: /path/to/NotoSansKR-Regular.ttf  # 한글 폰트 경로 (미설정 시 Latin-1 폴백)
 
+app:
+  base-url: ${APP_BASE_URL:http://localhost:3000}
