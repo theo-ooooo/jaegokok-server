@@ -141,7 +141,7 @@ public class WorkspaceService {
     @Transactional
     public WorkspaceResponse updateProfile(Long memberId, UpdateWorkspaceProfileRequest request) {
         Workspace workspace = workspaceRepository.updateProfile(
-                memberId, request.companyName(), request.businessNumber(), request.address(), request.phone());
+                memberId, request.name(), request.businessNumber(), request.address(), request.phone());
         Optional<WorkspaceTrial> trial = workspaceTrialRepository.findByWorkspaceId(workspace.id());
         return WorkspaceResponse.from(workspace, trial);
     }

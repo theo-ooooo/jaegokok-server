@@ -11,7 +11,6 @@ public record Workspace(
         String name,
         String description,
         WorkspacePlan plan,
-        String companyName,
         String businessNumber,
         String address,
         String phone,
