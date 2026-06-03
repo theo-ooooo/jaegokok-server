@@ -42,6 +42,10 @@ public class S3FileService implements FileUploadPort {
     @Override
     public String toUrl(String key) {
         if (key == null || key.isBlank()) return null;
+        String base = s3Properties.publicBaseUrl();
+        if (base != null && !base.isBlank()) {
+            return base.replaceAll("/+$", "") + "/" + key;
+        }
         return "https://" + s3Properties.bucket() + ".s3." + s3Properties.region() + ".amazonaws.com/" + key;
     }
 
