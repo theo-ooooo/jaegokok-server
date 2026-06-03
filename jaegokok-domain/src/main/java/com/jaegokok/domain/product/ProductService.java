@@ -2,6 +2,7 @@ package com.jaegokok.domain.product;
 
 import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
+import com.jaegokok.common.util.Filenames;
 import com.jaegokok.core.image.ImageEntityType;
 import com.jaegokok.core.workspace.WorkspacePlan;
 import com.jaegokok.domain.file.FileUploadPort;
@@ -17,6 +18,7 @@ import com.jaegokok.domain.workspace.WorkspaceMemberRepository;
 import com.jaegokok.domain.workspace.WorkspaceRepository;
 import com.jaegokok.domain.workspace.WorkspaceService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -128,18 +131,21 @@ public class ProductService {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
         String originalKey = fileUploadPort.upload("products/" + productId + "/original", originalFilename, content, contentType);
-        byte[] webpBytes = imageEncoderPort.toWebp(content);
-        String webpKey = fileUploadPort.upload("products/" + productId + "/webp", stripExt(originalFilename) + ".webp", webpBytes, "image/webp");
+        String webpKey = tryConvertAndUploadWebp("products/" + productId + "/webp", originalFilename, content);
         imageRepository.deleteByEntity(ImageEntityType.PRODUCT, productId);
         imageRepository.save(ImageEntityType.PRODUCT, productId, originalKey, webpKey, fileUploadPort.getBucket());
         return ProductResponse.from(productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)), fileUploadPort);
     }
 
-    private String stripExt(String filename) {
-        if (filename == null) return "image";
-        int idx = filename.lastIndexOf('.');
-        return idx > 0 ? filename.substring(0, idx) : filename;
+    private String tryConvertAndUploadWebp(String directory, String originalFilename, byte[] content) {
+        try {
+            byte[] webpBytes = imageEncoderPort.toWebp(content);
+            return fileUploadPort.upload(directory, Filenames.stripExtension(originalFilename) + ".webp", webpBytes, "image/webp");
+        } catch (RuntimeException e) {
+            log.warn("WebP conversion/upload failed, falling back to original-only", e);
+            return null;
+        }
     }
 
     private Workspace getOwnerWorkspace(Long memberId) {
