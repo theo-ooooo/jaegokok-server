@@ -6,6 +6,7 @@ import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.common.response.GlobalResponse;
 import com.jaegokok.domain.workspace.WorkspaceInvitationRepository;
 import com.jaegokok.domain.workspace.WorkspaceService;
+import com.jaegokok.domain.workspace.dto.InvitationInfoResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
