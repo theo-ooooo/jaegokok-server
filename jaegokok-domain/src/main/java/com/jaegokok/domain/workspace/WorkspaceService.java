@@ -7,6 +7,7 @@ import com.jaegokok.core.workspace.WorkspaceMemberRole;
 import com.jaegokok.core.workspace.WorkspacePlan;
 import com.jaegokok.domain.email.EmailPort;
 import com.jaegokok.domain.file.FileUploadPort;
+import com.jaegokok.domain.file.ImageEncoderPort;
 import com.jaegokok.domain.image.ImageRepository;
 import com.jaegokok.domain.member.Member;
 import com.jaegokok.domain.member.MemberRepository;
@@ -31,6 +32,7 @@ public class WorkspaceService {
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final MemberRepository memberRepository;
     private final FileUploadPort fileUploadPort;
+    private final ImageEncoderPort imageEncoderPort;
     private final ImageRepository imageRepository;
     private final WorkspaceTrialRepository workspaceTrialRepository;
     private final WorkspaceInvitationRepository workspaceInvitationRepository;
@@ -45,7 +47,7 @@ public class WorkspaceService {
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
         Workspace workspace = workspaceRepository.findById(membership.workspaceId())
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        return WorkspaceResponse.from(workspace, workspaceTrialRepository.findByWorkspaceId(workspace.id()), membership);
+        return WorkspaceResponse.from(workspace, workspaceTrialRepository.findByWorkspaceId(workspace.id()), membership, fileUploadPort);
     }
 
     @Transactional(readOnly = true)
@@ -119,7 +121,7 @@ public class WorkspaceService {
         }
         Workspace workspace = workspaceRepository.save(memberId, request.name(), request.description(), WorkspacePlan.FREE);
         workspaceMemberRepository.save(workspace.id(), memberId, WorkspaceMemberRole.OWNER);
-        return WorkspaceResponse.from(workspace, Optional.empty());
+        return WorkspaceResponse.from(workspace, Optional.empty(), fileUploadPort);
     }
 
     @Transactional
@@ -170,20 +172,28 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.updateProfile(
                 memberId, request.name(), request.businessNumber(), request.address(), request.phone());
         Optional<WorkspaceTrial> trial = workspaceTrialRepository.findByWorkspaceId(workspace.id());
-        return WorkspaceResponse.from(workspace, trial);
+        return WorkspaceResponse.from(workspace, trial, fileUploadPort);
     }
 
     @Transactional
     public WorkspaceResponse uploadLogo(Long memberId, String originalFilename, byte[] content, String contentType) {
         Workspace workspace = workspaceRepository.findByOwnerId(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        String originalPath = fileUploadPort.upload("workspaces/" + workspace.id() + "/logo", originalFilename, content, contentType);
+        String originalKey = fileUploadPort.upload("workspaces/" + workspace.id() + "/logo", originalFilename, content, contentType);
+        byte[] webpBytes = imageEncoderPort.toWebp(content);
+        String webpKey = fileUploadPort.upload("workspaces/" + workspace.id() + "/logo-webp", stripExt(originalFilename) + ".webp", webpBytes, "image/webp");
         imageRepository.deleteByEntity(ImageEntityType.WORKSPACE, workspace.id());
-        imageRepository.save(ImageEntityType.WORKSPACE, workspace.id(), originalPath, null, fileUploadPort.getBucket());
+        imageRepository.save(ImageEntityType.WORKSPACE, workspace.id(), originalKey, webpKey, fileUploadPort.getBucket());
         Workspace updated = workspaceRepository.findByOwnerId(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
         Optional<WorkspaceTrial> trial = workspaceTrialRepository.findByWorkspaceId(updated.id());
-        return WorkspaceResponse.from(updated, trial);
+        return WorkspaceResponse.from(updated, trial, fileUploadPort);
+    }
+
+    private String stripExt(String filename) {
+        if (filename == null) return "image";
+        int idx = filename.lastIndexOf('.');
+        return idx > 0 ? filename.substring(0, idx) : filename;
     }
 
     @Transactional(readOnly = true)
@@ -210,6 +220,6 @@ public class WorkspaceService {
         }
         WorkspaceTrial trial = workspaceTrialRepository.save(workspace.id());
         workspaceRepository.updatePlan(workspace.id(), WorkspacePlan.PRO);
-        return WorkspaceResponse.from(workspace, Optional.of(trial));
+        return WorkspaceResponse.from(workspace, Optional.of(trial), fileUploadPort);
     }
 }

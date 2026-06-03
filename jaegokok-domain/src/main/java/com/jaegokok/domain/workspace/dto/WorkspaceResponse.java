@@ -2,6 +2,7 @@ package com.jaegokok.domain.workspace.dto;
 
 import com.jaegokok.core.workspace.WorkspaceMemberRole;
 import com.jaegokok.core.workspace.WorkspacePlan;
+import com.jaegokok.domain.file.FileUploadPort;
 import com.jaegokok.domain.image.dto.ImageResponse;
 import com.jaegokok.domain.workspace.Workspace;
 import com.jaegokok.domain.workspace.WorkspaceMember;
@@ -25,11 +26,11 @@ public record WorkspaceResponse(
         boolean isOnTrial,
         int trialDaysLeft
 ) {
-    public static WorkspaceResponse from(Workspace workspace, Optional<WorkspaceTrial> trial) {
-        return from(workspace, trial, null);
+    public static WorkspaceResponse from(Workspace workspace, Optional<WorkspaceTrial> trial, FileUploadPort urlResolver) {
+        return from(workspace, trial, null, urlResolver);
     }
 
-    public static WorkspaceResponse from(Workspace workspace, Optional<WorkspaceTrial> trial, WorkspaceMember membership) {
+    public static WorkspaceResponse from(Workspace workspace, Optional<WorkspaceTrial> trial, WorkspaceMember membership, FileUploadPort urlResolver) {
         boolean isOnTrial = trial.map(WorkspaceTrial::isActive).orElse(false);
         int trialDaysLeft = trial.map(WorkspaceTrial::daysLeft).orElse(0);
         String myRole = membership != null ? membership.role().name()
@@ -44,7 +45,7 @@ public record WorkspaceResponse(
                 workspace.businessNumber(),
                 workspace.address(),
                 workspace.phone(),
-                workspace.logo() != null ? ImageResponse.from(workspace.logo()) : null,
+                workspace.logo() != null ? ImageResponse.from(workspace.logo(), urlResolver) : null,
                 workspace.createdAt(),
                 isOnTrial,
                 trialDaysLeft

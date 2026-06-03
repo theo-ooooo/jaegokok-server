@@ -3,6 +3,7 @@ package com.jaegokok.domain.inventory;
 import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.core.inventory.InventoryType;
+import com.jaegokok.domain.file.FileUploadPort;
 import com.jaegokok.domain.inventory.dto.PublicScanResponse;
 import com.jaegokok.domain.inventory.dto.ScanRequest;
 import com.jaegokok.domain.inventory.dto.ScanResponse;
@@ -24,6 +25,7 @@ public class ScanService {
     private final ProductRepository productRepository;
     private final InventoryRecordRepository inventoryRecordRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
+    private final FileUploadPort fileUploadPort;
 
     @Transactional
     public ScanResponse scanIn(String qrCode, Long memberId, ScanRequest request) {
@@ -68,7 +70,7 @@ public class ScanService {
     public PublicScanResponse getProductByQrCode(String qrCode) {
         Product product = findByQrCodeOrThrow(qrCode);
         String imageUrl = (product.images() != null && !product.images().isEmpty())
-                ? product.images().get(0).originalPath()
+                ? fileUploadPort.toUrl(product.images().get(0).originalPath())
                 : null;
         return new PublicScanResponse(product.id(), product.name(), product.qrCode(), product.workspaceId(),
                 product.currentStock(), imageUrl);

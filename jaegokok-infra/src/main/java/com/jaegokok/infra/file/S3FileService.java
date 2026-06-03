@@ -31,12 +31,18 @@ public class S3FileService implements FileUploadPort {
                 RequestBody.fromBytes(content)
         );
 
-        return "https://" + s3Properties.bucket() + ".s3." + s3Properties.region() + ".amazonaws.com/" + key;
+        return key;
     }
 
     @Override
     public String getBucket() {
         return s3Properties.bucket();
+    }
+
+    @Override
+    public String toUrl(String key) {
+        if (key == null || key.isBlank()) return null;
+        return "https://" + s3Properties.bucket() + ".s3." + s3Properties.region() + ".amazonaws.com/" + key;
     }
 
     private String extractExtension(String filename) {
