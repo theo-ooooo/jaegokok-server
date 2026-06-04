@@ -60,9 +60,9 @@ public class WorkspaceService {
     public WorkspaceResponse getWorkspaceBySlug(Long requesterId, String slug) {
         Workspace workspace = workspaceRepository.findBySlug(slug)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        workspaceMemberRepository.findByMemberId(requesterId)
-                .filter(m -> m.workspaceId().equals(workspace.id()))
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED));
+        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(workspace.id(), requesterId)) {
+            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
+        }
         Optional<WorkspaceTrial> trial = workspaceTrialRepository.findByWorkspaceId(workspace.id());
         return WorkspaceResponse.from(workspace, trial, fileUploadPort);
     }
