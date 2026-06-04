@@ -9,7 +9,6 @@ import com.jaegokok.domain.inventory.dto.InventoryRecordRequest;
 import com.jaegokok.domain.product.Product;
 import com.jaegokok.domain.product.ProductRepository;
 import com.jaegokok.domain.workspace.WorkspaceMemberRepository;
-import com.jaegokok.domain.workspace.WorkspaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,15 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class InventoryService {
 
     private final InventoryRecordRepository inventoryRecordRepository;
-    private final WorkspaceRepository workspaceRepository;
     private final ProductRepository productRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
 
     public Page<InventoryHistoryResponse> getHistory(Long memberId, InventoryHistoryCondition condition, Pageable pageable) {
-        Long workspaceId = workspaceRepository.findAllByMemberId(memberId)
+        Long workspaceId = workspaceMemberRepository.findAllByMemberId(memberId)
                 .stream()
                 .findFirst()
-                .map(w -> w.id())
+                .map(wm -> wm.workspaceId())
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
 
         return inventoryRecordRepository.findByCondition(workspaceId, condition, pageable)
