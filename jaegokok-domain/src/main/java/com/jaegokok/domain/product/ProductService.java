@@ -57,10 +57,7 @@ public class ProductService {
         return ProductResponse.from(productRepository.save(workspace.id(), request, qrCode), fileUploadPort);
     }
 
-    public Page<ProductResponse> findAll(Long memberId, Long workspaceId, ProductSearchCondition condition, Pageable pageable) {
-        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(workspaceId, memberId)) {
-            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
-        }
+    public Page<ProductResponse> findAllInWorkspace(Long workspaceId, ProductSearchCondition condition, Pageable pageable) {
         return productRepository.findByWorkspaceId(workspaceId, condition, pageable)
                 .map(p -> ProductResponse.from(p, fileUploadPort));
     }
@@ -71,10 +68,7 @@ public class ProductService {
                 .map(p -> ProductResponse.from(p, fileUploadPort));
     }
 
-    public ProductResponse findById(Long memberId, Long workspaceId, Long productId) {
-        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(workspaceId, memberId)) {
-            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
-        }
+    public ProductResponse findByIdInWorkspace(Long workspaceId, Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         if (!product.workspaceId().equals(workspaceId)) {

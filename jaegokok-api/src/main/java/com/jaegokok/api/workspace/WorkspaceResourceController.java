@@ -56,7 +56,7 @@ public class WorkspaceResourceController {
     ) {
         checkAccess(principal.getId(), workspaceId);
         ProductSearchCondition condition = new ProductSearchCondition(name, category, lowStock);
-        return GlobalResponse.success(HttpStatus.OK.value(), productService.findAll(principal.getId(), workspaceId, condition, pageable));
+        return GlobalResponse.success(HttpStatus.OK.value(), productService.findAllInWorkspace(workspaceId, condition, pageable));
     }
 
     @GetMapping("/dashboard")
@@ -65,7 +65,7 @@ public class WorkspaceResourceController {
             @PathVariable Long workspaceId
     ) {
         checkAccess(principal.getId(), workspaceId);
-        return GlobalResponse.success(HttpStatus.OK.value(), dashboardService.getDashboard(principal.getId(), workspaceId));
+        return GlobalResponse.success(HttpStatus.OK.value(), dashboardService.getDashboard(workspaceId));
     }
 
     @GetMapping("/inventory/history")
@@ -80,6 +80,6 @@ public class WorkspaceResourceController {
     ) {
         checkAccess(principal.getId(), workspaceId);
         InventoryHistoryCondition condition = new InventoryHistoryCondition(productId, type, dateFrom, dateTo);
-        return GlobalResponse.success(HttpStatus.OK.value(), inventoryService.getHistory(principal.getId(), workspaceId, condition, pageable));
+        return GlobalResponse.success(HttpStatus.OK.value(), inventoryService.getHistoryByWorkspace(workspaceId, condition, pageable));
     }
 }

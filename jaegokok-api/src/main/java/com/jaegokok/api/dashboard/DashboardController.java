@@ -21,6 +21,6 @@ public class DashboardController {
     public GlobalResponse<DashboardResponse> getDashboard(
             @AuthenticationPrincipal UserPrincipal principal
     ) {
-        return GlobalResponse.success(HttpStatus.OK.value(), dashboardService.getDashboard(principal.getId()));
+        return GlobalResponse.success(HttpStatus.OK.value(), dashboardService.getDashboard(principal.getId(), true));
     }
 }

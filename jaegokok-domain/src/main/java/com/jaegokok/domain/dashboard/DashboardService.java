@@ -26,19 +26,19 @@ public class DashboardService {
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final WorkspaceRepository workspaceRepository;
 
-    public DashboardResponse getDashboard(Long memberId) {
+    /** 신규: Controller에서 checkAccess 완료 후 호출 — 내부 재검증 없음 */
+    public DashboardResponse getDashboard(Long workspaceId) {
+        return buildDashboard(workspaceId);
+    }
+
+    /** @deprecated 레거시 경로용. findByMemberId.findFirst() 패턴으로 다중 워크스페이스 미지원. */
+    @Deprecated
+    public DashboardResponse getDashboard(Long memberId, boolean legacy) {
         Long workspaceId = workspaceRepository.findByOwnerId(memberId)
                 .or(() -> workspaceMemberRepository.findByMemberId(memberId)
                         .flatMap(wm -> workspaceRepository.findById(wm.workspaceId())))
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND))
                 .id();
-        return buildDashboard(workspaceId);
-    }
-
-    public DashboardResponse getDashboard(Long memberId, Long workspaceId) {
-        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(workspaceId, memberId)) {
-            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
-        }
         return buildDashboard(workspaceId);
     }
 
