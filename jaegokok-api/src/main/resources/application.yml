@@ -13,6 +13,7 @@ spring:
       - docs
       - s3
       - mail
+      - toss
 
 server:
   port: 8080
@@ -24,5 +25,3 @@ qr:
 app:
   base-url: ${APP_BASE_URL:http://localhost:3000}
 
-toss:
-  secret-key: ${TOSS_SECRET_KEY}  # set TOSS_SECRET_KEY env var (test: test_sk_Wd46qopOB897EnqReAdVZmM75y0v)
