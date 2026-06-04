@@ -1,5 +1,6 @@
 package com.jaegokok.domain.product.dto;
 
+import com.jaegokok.domain.file.FileUploadPort;
 import com.jaegokok.domain.image.dto.ImageResponse;
 import com.jaegokok.domain.product.Product;
 
@@ -22,7 +23,7 @@ public record ProductResponse(
         List<ImageResponse> images,
         LocalDateTime createdAt
 ) {
-    public static ProductResponse from(Product product) {
+    public static ProductResponse from(Product product, FileUploadPort urlResolver) {
         return new ProductResponse(
                 product.id(),
                 product.workspaceId(),
@@ -35,7 +36,7 @@ public record ProductResponse(
                 product.minStockLevel(),
                 product.currentStock(),
                 product.qrCode(),
-                product.images().stream().map(ImageResponse::from).toList(),
+                product.images().stream().map(img -> ImageResponse.from(img, urlResolver)).toList(),
                 product.createdAt()
         );
     }

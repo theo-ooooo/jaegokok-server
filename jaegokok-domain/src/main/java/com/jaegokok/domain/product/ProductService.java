@@ -2,9 +2,11 @@ package com.jaegokok.domain.product;
 
 import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
+import com.jaegokok.common.util.Filenames;
 import com.jaegokok.core.image.ImageEntityType;
 import com.jaegokok.core.workspace.WorkspacePlan;
 import com.jaegokok.domain.file.FileUploadPort;
+import com.jaegokok.domain.file.ImageEncoderPort;
 import com.jaegokok.domain.image.ImageRepository;
 import com.jaegokok.domain.product.dto.CreateProductRequest;
 import com.jaegokok.domain.product.dto.ProductResponse;
@@ -16,6 +18,7 @@ import com.jaegokok.domain.workspace.WorkspaceMemberRepository;
 import com.jaegokok.domain.workspace.WorkspaceRepository;
 import com.jaegokok.domain.workspace.WorkspaceService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -35,6 +39,7 @@ public class ProductService {
     private final WorkspaceService workspaceService;
     private final QrCodePort qrCodePort;
     private final FileUploadPort fileUploadPort;
+    private final ImageEncoderPort imageEncoderPort;
     private final ImageRepository imageRepository;
     private final SubscriptionPlanRepository subscriptionPlanRepository;
 
@@ -49,13 +54,13 @@ public class ProductService {
             throw new CustomException(ErrorCode.PRODUCT_LIMIT_EXCEEDED);
         }
         String qrCode = UUID.randomUUID().toString();
-        return ProductResponse.from(productRepository.save(workspace.id(), request, qrCode));
+        return ProductResponse.from(productRepository.save(workspace.id(), request, qrCode), fileUploadPort);
     }
 
     public Page<ProductResponse> findAll(Long memberId, ProductSearchCondition condition, Pageable pageable) {
         Workspace workspace = getMemberWorkspace(memberId);
         return productRepository.findByWorkspaceId(workspace.id(), condition, pageable)
-                .map(ProductResponse::from);
+                .map(p -> ProductResponse.from(p, fileUploadPort));
     }
 
     public ProductResponse findById(Long memberId, Long productId) {
@@ -65,7 +70,7 @@ public class ProductService {
         if (!product.workspaceId().equals(workspace.id())) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
-        return ProductResponse.from(product);
+        return ProductResponse.from(product, fileUploadPort);
     }
 
     @Transactional
@@ -76,7 +81,7 @@ public class ProductService {
         if (!product.workspaceId().equals(workspace.id())) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
-        return ProductResponse.from(productRepository.update(productId, request));
+        return ProductResponse.from(productRepository.update(productId, request), fileUploadPort);
     }
 
     @Transactional
@@ -125,11 +130,22 @@ public class ProductService {
         if (!product.workspaceId().equals(workspace.id())) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
-        String originalPath = fileUploadPort.upload("products/" + productId + "/original", originalFilename, content, contentType);
+        String originalKey = fileUploadPort.upload("products/" + productId + "/original", originalFilename, content, contentType);
+        String webpKey = tryConvertAndUploadWebp("products/" + productId + "/webp", originalFilename, content);
         imageRepository.deleteByEntity(ImageEntityType.PRODUCT, productId);
-        imageRepository.save(ImageEntityType.PRODUCT, productId, originalPath, null, fileUploadPort.getBucket());
+        imageRepository.save(ImageEntityType.PRODUCT, productId, originalKey, webpKey, fileUploadPort.getBucket());
         return ProductResponse.from(productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)));
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)), fileUploadPort);
+    }
+
+    private String tryConvertAndUploadWebp(String directory, String originalFilename, byte[] content) {
+        try {
+            byte[] webpBytes = imageEncoderPort.toWebp(content);
+            return fileUploadPort.upload(directory, Filenames.stripExtension(originalFilename) + ".webp", webpBytes, "image/webp");
+        } catch (RuntimeException e) {
+            log.warn("WebP conversion/upload failed, falling back to original-only", e);
+            return null;
+        }
     }
 
     private Workspace getOwnerWorkspace(Long memberId) {

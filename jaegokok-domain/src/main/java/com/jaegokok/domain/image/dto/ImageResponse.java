@@ -1,13 +1,18 @@
 package com.jaegokok.domain.image.dto;
 
+import com.jaegokok.domain.file.FileUploadPort;
 import com.jaegokok.domain.image.Image;
 
 public record ImageResponse(
         Long id,
-        String originalPath,
-        String webpPath
+        String originalUrl,
+        String webpUrl
 ) {
-    public static ImageResponse from(Image image) {
-        return new ImageResponse(image.id(), image.originalPath(), image.webpPath());
+    public static ImageResponse from(Image image, FileUploadPort urlResolver) {
+        return new ImageResponse(
+                image.id(),
+                urlResolver.toUrl(image.originalPath()),
+                urlResolver.toUrl(image.webpPath())
+        );
     }
 }
