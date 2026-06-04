@@ -1,8 +1,8 @@
 package com.jaegokok.api.payment;
 
-import com.jaegokok.domain.payment.Payment;
+import com.jaegokok.domain.payment.BillingPayment;
 
-public record PaymentResponse(
+public record BillingPaymentResponse(
         Long id,
         String orderId,
         Long planId,
@@ -10,8 +10,8 @@ public record PaymentResponse(
         String status,
         Long billingId
 ) {
-    public static PaymentResponse from(Payment payment) {
-        return new PaymentResponse(
+    public static BillingPaymentResponse from(BillingPayment payment) {
+        return new BillingPaymentResponse(
                 payment.id(),
                 payment.orderId(),
                 payment.planId(),

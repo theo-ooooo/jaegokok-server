@@ -7,10 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "payments")
+@Table(name = "billing_payments")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PaymentEntity extends BaseEntity {
+public class BillingPaymentEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,8 +40,8 @@ public class PaymentEntity extends BaseEntity {
     @Column(name = "billing_id")
     private Long billingId;
 
-    public static PaymentEntity create(Long workspaceId, String orderId, Long planId, int amount, Long billingId) {
-        PaymentEntity e = new PaymentEntity();
+    public static BillingPaymentEntity create(Long workspaceId, String orderId, Long planId, int amount, Long billingId) {
+        BillingPaymentEntity e = new BillingPaymentEntity();
         e.workspaceId = workspaceId;
         e.orderId = orderId;
         e.planId = planId;

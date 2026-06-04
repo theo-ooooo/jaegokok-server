@@ -3,8 +3,8 @@ package com.jaegokok.domain.billing;
 import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.core.workspace.WorkspacePlan;
-import com.jaegokok.domain.payment.Payment;
-import com.jaegokok.domain.payment.PaymentRepository;
+import com.jaegokok.domain.payment.BillingPayment;
+import com.jaegokok.domain.payment.BillingPaymentRepository;
 import com.jaegokok.domain.payment.TossPaymentPort;
 import com.jaegokok.domain.subscription.SubscriptionPlan;
 import com.jaegokok.domain.subscription.SubscriptionPlanRepository;
@@ -25,7 +25,7 @@ import java.util.List;
 public class BillingService {
 
     private final WorkspaceBillingRepository workspaceBillingRepository;
-    private final PaymentRepository paymentRepository;
+    private final BillingPaymentRepository billingPaymentRepository;
     private final TossPaymentPort tossPaymentPort;
     private final WorkspaceRepository workspaceRepository;
     private final SubscriptionPlanRepository subscriptionPlanRepository;
@@ -54,8 +54,8 @@ public class BillingService {
 
         WorkspaceBilling billing = workspaceBillingRepository.save(workspace.id(), keyResult.billingKey(), customerKey, plan.id());
 
-        Payment payment = paymentRepository.save(workspace.id(), orderId, plan.id(), plan.priceKrw(), billing.id());
-        paymentRepository.confirm(payment.id(), orderId, chargeResult.message());
+        BillingPayment payment = billingPaymentRepository.save(workspace.id(), orderId, plan.id(), plan.priceKrw(), billing.id());
+        billingPaymentRepository.confirm(payment.id(), orderId, chargeResult.message());
 
         workspaceRepository.updatePlan(workspace.id(), WorkspacePlan.valueOf(planKey));
     }
@@ -73,8 +73,8 @@ public class BillingService {
                         billing.billingKey(), orderId, orderName, plan.priceKrw(), billing.customerKey());
                 if (result.success()) {
                     workspaceBillingRepository.renewNextDate(billing.id());
-                    Payment payment = paymentRepository.save(billing.workspaceId(), orderId, billing.planId(), plan.priceKrw(), billing.id());
-                    paymentRepository.confirm(payment.id(), orderId, result.message());
+                    BillingPayment payment = billingPaymentRepository.save(billing.workspaceId(), orderId, billing.planId(), plan.priceKrw(), billing.id());
+                    billingPaymentRepository.confirm(payment.id(), orderId, result.message());
                 }
             } catch (Exception e) {
                 log.warn("Billing failed for workspace {}: {}", billing.workspaceId(), e.getMessage());

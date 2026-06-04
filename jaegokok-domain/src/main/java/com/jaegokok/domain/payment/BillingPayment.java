@@ -1,6 +1,6 @@
 package com.jaegokok.domain.payment;
 
-public record Payment(
+public record BillingPayment(
         Long id,
         Long workspaceId,
         String orderId,

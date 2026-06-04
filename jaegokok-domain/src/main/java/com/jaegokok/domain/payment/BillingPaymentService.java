@@ -15,15 +15,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class PaymentService {
+public class BillingPaymentService {
 
-    private final PaymentRepository paymentRepository;
+    private final BillingPaymentRepository billingPaymentRepository;
     private final TossPaymentPort tossPaymentPort;
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceTrialRepository workspaceTrialRepository;
     private final SubscriptionPlanRepository subscriptionPlanRepository;
 
-    public Payment confirmPayment(Long memberId, String paymentKey, String orderId, int amount, String planKey) {
+    public BillingPayment confirmPayment(Long memberId, String paymentKey, String orderId, int amount, String planKey) {
         // 1. Validate amount against subscription plan price
         SubscriptionPlan plan = subscriptionPlanRepository.findByPlanKey(planKey)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
@@ -32,26 +32,26 @@ public class PaymentService {
         }
 
         // 2. Find or create payment record
-        Payment payment = paymentRepository.findByOrderId(orderId)
+        BillingPayment payment = billingPaymentRepository.findByOrderId(orderId)
                 .orElseGet(() -> {
                     Workspace ws = workspaceRepository.findByOwnerId(memberId)
                             .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-                    return paymentRepository.save(ws.id(), orderId, plan.id(), amount, null);
+                    return billingPaymentRepository.save(ws.id(), orderId, plan.id(), amount, null);
                 });
 
         // 3. Call Toss Payments API
         TossPaymentPort.TossConfirmResult result = tossPaymentPort.confirm(paymentKey, orderId, amount);
 
         if (result.success()) {
-            paymentRepository.confirm(payment.id(), paymentKey, result.message());
+            billingPaymentRepository.confirm(payment.id(), paymentKey, result.message());
             // 4. Upgrade workspace plan
             WorkspacePlan newPlan = WorkspacePlan.valueOf(planKey);
             workspaceRepository.updatePlan(payment.workspaceId(), newPlan);
         } else {
-            paymentRepository.fail(payment.id());
+            billingPaymentRepository.fail(payment.id());
             throw new CustomException(ErrorCode.PAYMENT_FAILED);
         }
 
-        return paymentRepository.findByOrderId(orderId).orElseThrow();
+        return billingPaymentRepository.findByOrderId(orderId).orElseThrow();
     }
 }

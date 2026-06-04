@@ -2,8 +2,8 @@ package com.jaegokok.api.payment;
 
 import com.jaegokok.api.security.UserPrincipal;
 import com.jaegokok.common.response.GlobalResponse;
-import com.jaegokok.domain.payment.Payment;
-import com.jaegokok.domain.payment.PaymentService;
+import com.jaegokok.domain.payment.BillingPayment;
+import com.jaegokok.domain.payment.BillingPaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,20 +18,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PaymentController {
 
-    private final PaymentService paymentService;
+    private final BillingPaymentService billingPaymentService;
 
     @PostMapping("/toss/confirm")
-    public GlobalResponse<PaymentResponse> confirmTossPayment(
+    public GlobalResponse<BillingPaymentResponse> confirmTossPayment(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody TossConfirmRequest request
     ) {
-        Payment payment = paymentService.confirmPayment(
+        BillingPayment payment = billingPaymentService.confirmPayment(
                 principal.getId(),
                 request.paymentKey(),
                 request.orderId(),
                 request.amount(),
                 request.planKey()
         );
-        return GlobalResponse.success(HttpStatus.OK.value(), PaymentResponse.from(payment));
+        return GlobalResponse.success(HttpStatus.OK.value(), BillingPaymentResponse.from(payment));
     }
 }
