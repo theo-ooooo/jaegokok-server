@@ -18,7 +18,7 @@ public class WebpImageEncoder implements ImageEncoderPort {
             ImmutableImage image = ImmutableImage.loader().fromBytes(originalBytes);
             return image.bytes(WebpWriter.DEFAULT);
         } catch (IOException e) {
-            throw new CustomException(ErrorCode.IMAGE_CONVERT_FAILED);
+            throw new CustomException(ErrorCode.IMAGE_CONVERT_FAILED, e);
         }
     }
 }

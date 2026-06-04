@@ -53,6 +53,8 @@ public class S3FileService implements FileUploadPort {
     @Override
     public String toUrl(String key) {
         if (key == null || key.isBlank()) return null;
+        // 과거 데이터: original_path에 풀 URL이 박혀있던 row 호환
+        if (key.startsWith("http://") || key.startsWith("https://")) return key;
         String trimmedKey = key.startsWith("/") ? key.substring(1) : key;
         String base = s3Properties.publicBaseUrl();
         if (base != null && !base.isBlank()) {

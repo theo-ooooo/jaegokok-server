@@ -2,6 +2,7 @@ package com.jaegokok.domain.workspace;
 
 import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
+import com.jaegokok.common.util.Filenames;
 import com.jaegokok.core.image.ImageEntityType;
 import com.jaegokok.core.workspace.WorkspaceMemberRole;
 import com.jaegokok.core.workspace.WorkspacePlan;
@@ -17,6 +18,7 @@ import com.jaegokok.domain.workspace.dto.UpdateWorkspaceProfileRequest;
 import com.jaegokok.domain.workspace.dto.WorkspaceMemberResponse;
 import com.jaegokok.domain.workspace.dto.WorkspaceResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WorkspaceService {
@@ -180,8 +183,7 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findByOwnerId(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
         String originalKey = fileUploadPort.upload("workspaces/" + workspace.id() + "/logo", originalFilename, content, contentType);
-        byte[] webpBytes = imageEncoderPort.toWebp(content);
-        String webpKey = fileUploadPort.upload("workspaces/" + workspace.id() + "/logo-webp", stripExt(originalFilename) + ".webp", webpBytes, "image/webp");
+        String webpKey = tryConvertAndUploadWebp("workspaces/" + workspace.id() + "/logo-webp", originalFilename, content);
         imageRepository.deleteByEntity(ImageEntityType.WORKSPACE, workspace.id());
         imageRepository.save(ImageEntityType.WORKSPACE, workspace.id(), originalKey, webpKey, fileUploadPort.getBucket());
         Workspace updated = workspaceRepository.findByOwnerId(memberId)
@@ -190,10 +192,14 @@ public class WorkspaceService {
         return WorkspaceResponse.from(updated, trial, fileUploadPort);
     }
 
-    private String stripExt(String filename) {
-        if (filename == null) return "image";
-        int idx = filename.lastIndexOf('.');
-        return idx > 0 ? filename.substring(0, idx) : filename;
+    private String tryConvertAndUploadWebp(String directory, String originalFilename, byte[] content) {
+        try {
+            byte[] webpBytes = imageEncoderPort.toWebp(content);
+            return fileUploadPort.upload(directory, Filenames.stripExtension(originalFilename) + ".webp", webpBytes, "image/webp");
+        } catch (RuntimeException e) {
+            log.warn("WebP conversion/upload failed, falling back to original-only", e);
+            return null;
+        }
     }
 
     @Transactional(readOnly = true)
