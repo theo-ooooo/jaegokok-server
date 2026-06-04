@@ -8,7 +8,10 @@ import com.jaegokok.domain.inventory.dto.InventoryHistoryResponse;
 import com.jaegokok.domain.inventory.dto.InventoryRecordRequest;
 import com.jaegokok.domain.product.Product;
 import com.jaegokok.domain.product.ProductRepository;
+import java.util.List;
+import java.util.Map;
 import com.jaegokok.core.image.ImageEntityType;
+import com.jaegokok.domain.file.FileUploadPort;
 import com.jaegokok.domain.image.Image;
 import com.jaegokok.domain.image.ImageRepository;
 import com.jaegokok.domain.workspace.WorkspaceMemberRepository;
@@ -29,20 +32,12 @@ public class InventoryService {
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final WorkspaceRepository workspaceRepository;
     private final ImageRepository imageRepository;
-    private final com.jaegokok.domain.file.FileUploadPort fileUploadPort;
+    private final FileUploadPort fileUploadPort;
 
     public Page<InventoryHistoryResponse> getHistoryByWorkspace(Long workspaceId, InventoryHistoryCondition condition, Pageable pageable) {
         Page<InventoryHistoryResponse> page = inventoryRecordRepository.findByCondition(workspaceId, condition, pageable)
                 .map(InventoryHistoryResponse::from);
-        java.util.List<Long> productIds = page.getContent().stream()
-                .map(InventoryHistoryResponse::productId).distinct().toList();
-        java.util.Map<Long, Image> imageMap = imageRepository.findFirstByEntityIds(ImageEntityType.PRODUCT, productIds);
-        return page.map(r -> {
-            Image img = imageMap.get(r.productId());
-            if (img == null) return r;
-            String url = img.webpPath() != null ? fileUploadPort.toUrl(img.webpPath()) : fileUploadPort.toUrl(img.originalPath());
-            return r.withImageUrl(url);
-        });
+        return enrichWithImages(page);
     }
 
     @Deprecated
@@ -51,8 +46,21 @@ public class InventoryService {
                 .stream().findFirst()
                 .map(wm -> wm.workspaceId())
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        return inventoryRecordRepository.findByCondition(workspaceId, condition, pageable)
+        Page<InventoryHistoryResponse> page = inventoryRecordRepository.findByCondition(workspaceId, condition, pageable)
                 .map(InventoryHistoryResponse::from);
+        return enrichWithImages(page);
+    }
+
+    private Page<InventoryHistoryResponse> enrichWithImages(Page<InventoryHistoryResponse> page) {
+        List<Long> productIds = page.getContent().stream()
+                .map(InventoryHistoryResponse::productId).distinct().toList();
+        Map<Long, Image> imageMap = imageRepository.findFirstByEntityIds(ImageEntityType.PRODUCT, productIds);
+        return page.map(r -> {
+            Image img = imageMap.get(r.productId());
+            if (img == null) return r;
+            String url = img.webpPath() != null ? fileUploadPort.toUrl(img.webpPath()) : fileUploadPort.toUrl(img.originalPath());
+            return r.withImageUrl(url);
+        });
     }
 
     @Transactional
