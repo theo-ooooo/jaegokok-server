@@ -1,0 +1,2 @@
+toss:
+  secret-key: ${TOSS_SECRET_KEY}  # set TOSS_SECRET_KEY env var (test: test_sk_Wd46qopOB897EnqReAdVZmM75y0v)
