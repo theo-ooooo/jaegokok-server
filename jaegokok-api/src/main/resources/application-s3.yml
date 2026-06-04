@@ -6,3 +6,4 @@ spring:
 s3:
   bucket: ${S3_BUCKET:jaegokok-dev}
   region: ${S3_REGION:ap-northeast-2}
+  public-base-url: ${S3_PUBLIC_BASE_URL:}

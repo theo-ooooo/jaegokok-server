@@ -2,6 +2,7 @@ package com.jaegokok.infra.file;
 
 import com.jaegokok.domain.file.FileUploadPort;
 import com.jaegokok.infra.config.S3Properties;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -16,6 +17,16 @@ public class S3FileService implements FileUploadPort {
 
     private final S3Client s3Client;
     private final S3Properties s3Properties;
+
+    @PostConstruct
+    void validatePublicBaseUrl() {
+        String base = s3Properties.publicBaseUrl();
+        if (base == null || base.isBlank()) return;
+        if (!base.startsWith("http://") && !base.startsWith("https://")) {
+            throw new IllegalStateException(
+                    "S3_PUBLIC_BASE_URL must start with http:// or https://, got: " + base);
+        }
+    }
 
     @Override
     public String upload(String directory, String originalFilename, byte[] content, String contentType) {
@@ -44,7 +55,12 @@ public class S3FileService implements FileUploadPort {
         if (key == null || key.isBlank()) return null;
         // 과거 데이터: original_path에 풀 URL이 박혀있던 row 호환
         if (key.startsWith("http://") || key.startsWith("https://")) return key;
-        return "https://" + s3Properties.bucket() + ".s3." + s3Properties.region() + ".amazonaws.com/" + key;
+        String trimmedKey = key.startsWith("/") ? key.substring(1) : key;
+        String base = s3Properties.publicBaseUrl();
+        if (base != null && !base.isBlank()) {
+            return base.replaceAll("/+$", "") + "/" + trimmedKey;
+        }
+        return "https://" + s3Properties.bucket() + ".s3." + s3Properties.region() + ".amazonaws.com/" + trimmedKey;
     }
 
     private String extractExtension(String filename) {
