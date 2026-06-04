@@ -28,6 +28,12 @@ public class SubscriptionPlanRepositoryImpl implements SubscriptionPlanRepositor
                 .map(this::toSubscriptionPlan);
     }
 
+    @Override
+    public Optional<SubscriptionPlan> findById(Long id) {
+        return subscriptionPlanJpaRepository.findById(id)
+                .map(this::toSubscriptionPlan);
+    }
+
     private SubscriptionPlan toSubscriptionPlan(SubscriptionPlanEntity e) {
         return new SubscriptionPlan(
                 e.getId(),

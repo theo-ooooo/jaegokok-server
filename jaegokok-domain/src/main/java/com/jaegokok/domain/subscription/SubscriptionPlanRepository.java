@@ -6,4 +6,5 @@ import java.util.Optional;
 public interface SubscriptionPlanRepository {
     List<SubscriptionPlan> findAllActive();
     Optional<SubscriptionPlan> findByPlanKey(String planKey);
+    Optional<SubscriptionPlan> findById(Long id);
 }

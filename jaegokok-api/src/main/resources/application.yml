@@ -13,6 +13,7 @@ spring:
       - docs
       - s3
       - mail
+      - toss
 
 server:
   port: 8080
@@ -23,3 +24,4 @@ qr:
 
 app:
   base-url: ${APP_BASE_URL:http://localhost:3000}
+
