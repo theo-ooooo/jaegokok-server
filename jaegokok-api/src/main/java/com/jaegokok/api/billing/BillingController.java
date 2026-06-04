@@ -24,7 +24,7 @@ public class BillingController {
         return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.startTrial(principal.getId()));
     }
 
-    @PostMapping("/billing/auth")
+    @PostMapping("/auth")
     public GlobalResponse<Void> activateBilling(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody BillingAuthRequest request) {
@@ -32,7 +32,7 @@ public class BillingController {
         return GlobalResponse.success(HttpStatus.OK.value(), null);
     }
 
-    @DeleteMapping("/billing")
+    @DeleteMapping
     public GlobalResponse<Void> cancelBilling(@AuthenticationPrincipal UserPrincipal principal) {
         billingService.cancelBilling(principal.getId());
         return GlobalResponse.success(HttpStatus.OK.value(), null);

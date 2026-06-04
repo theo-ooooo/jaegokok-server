@@ -35,6 +35,10 @@ public class BillingService {
         Workspace workspace = workspaceRepository.findByOwnerId(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
 
+        workspaceBillingRepository.findByWorkspaceId(workspace.id())
+                .filter(b -> "ACTIVE".equals(b.status()))
+                .ifPresent(b -> { throw new CustomException(ErrorCode.ALREADY_ON_PAID_PLAN); });
+
         SubscriptionPlan plan = subscriptionPlanRepository.findByPlanKey(planKey)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
 
