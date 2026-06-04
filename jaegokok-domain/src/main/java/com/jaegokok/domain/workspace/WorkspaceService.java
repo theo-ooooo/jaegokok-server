@@ -167,7 +167,13 @@ public class WorkspaceService {
                 throw new CustomException(ErrorCode.MEMBER_LIMIT_EXCEEDED);
             }
         }
-        // 기존 미사용 초대 삭제 후 재발송 허용
+        // 이미 가입된 계정이면 바로 워크스페이스 멤버로 추가
+        Optional<com.jaegokok.domain.member.Member> existingMember = memberRepository.findByEmail(email);
+        if (existingMember.isPresent()) {
+            workspaceMemberRepository.save(workspace.id(), existingMember.get().id(), role);
+            return;
+        }
+        // 미가입 계정이면 초대 이메일 발송 (기존 초대 삭제 후 재발송)
         workspaceInvitationRepository.deleteByWorkspaceIdAndEmail(workspace.id(), email);
         WorkspaceInvitation invitation = workspaceInvitationRepository.save(workspace.id(), email, role);
         String inviteUrl = appConfigPort.getBaseUrl() + "/signup?invite=" + invitation.token();
