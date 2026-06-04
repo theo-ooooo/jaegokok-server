@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface ImageJpaRepository extends JpaRepository<ImageEntity, Long> {
     List<ImageEntity> findByEntityTypeAndEntityId(ImageEntityType entityType, Long entityId);
     Optional<ImageEntity> findFirstByEntityTypeAndEntityId(ImageEntityType entityType, Long entityId);
+    List<ImageEntity> findByEntityTypeAndEntityIdIn(ImageEntityType entityType, List<Long> entityIds);
 
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM ImageEntity i WHERE i.entityType = :entityType AND i.entityId = :entityId")

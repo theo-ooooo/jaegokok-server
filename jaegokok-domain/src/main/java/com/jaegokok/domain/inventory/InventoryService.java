@@ -8,6 +8,9 @@ import com.jaegokok.domain.inventory.dto.InventoryHistoryResponse;
 import com.jaegokok.domain.inventory.dto.InventoryRecordRequest;
 import com.jaegokok.domain.product.Product;
 import com.jaegokok.domain.product.ProductRepository;
+import com.jaegokok.core.image.ImageEntityType;
+import com.jaegokok.domain.image.Image;
+import com.jaegokok.domain.image.ImageRepository;
 import com.jaegokok.domain.workspace.WorkspaceMemberRepository;
 import com.jaegokok.domain.workspace.WorkspaceRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +28,21 @@ public class InventoryService {
     private final ProductRepository productRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final WorkspaceRepository workspaceRepository;
+    private final ImageRepository imageRepository;
+    private final com.jaegokok.domain.file.FileUploadPort fileUploadPort;
 
     public Page<InventoryHistoryResponse> getHistoryByWorkspace(Long workspaceId, InventoryHistoryCondition condition, Pageable pageable) {
-        return inventoryRecordRepository.findByCondition(workspaceId, condition, pageable)
+        Page<InventoryHistoryResponse> page = inventoryRecordRepository.findByCondition(workspaceId, condition, pageable)
                 .map(InventoryHistoryResponse::from);
+        java.util.List<Long> productIds = page.getContent().stream()
+                .map(InventoryHistoryResponse::productId).distinct().toList();
+        java.util.Map<Long, Image> imageMap = imageRepository.findFirstByEntityIds(ImageEntityType.PRODUCT, productIds);
+        return page.map(r -> {
+            Image img = imageMap.get(r.productId());
+            if (img == null) return r;
+            String url = img.webpPath() != null ? fileUploadPort.toUrl(img.webpPath()) : fileUploadPort.toUrl(img.originalPath());
+            return r.withImageUrl(url);
+        });
     }
 
     @Deprecated
