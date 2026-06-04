@@ -26,12 +26,13 @@ public class DashboardService {
     private final WorkspaceRepository workspaceRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
 
-    public DashboardResponse getDashboard(Long memberId) {
-        Long workspaceId = workspaceRepository.findByOwnerId(memberId)
-                .or(() -> workspaceMemberRepository.findByMemberId(memberId)
-                        .flatMap(wm -> workspaceRepository.findById(wm.workspaceId())))
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND))
-                .id();
+    public DashboardResponse getDashboard(Long memberId, String workspaceSlug) {
+        com.jaegokok.domain.workspace.Workspace ws = workspaceRepository.findBySlug(workspaceSlug)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(ws.id(), memberId)) {
+            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
+        }
+        Long workspaceId = ws.id();
 
         LocalDate today = LocalDate.now();
         long totalProducts = dashboardRepository.countProducts(workspaceId);

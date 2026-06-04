@@ -7,9 +7,8 @@ import com.jaegokok.domain.dashboard.dto.DashboardResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/api/v1/dashboard")
@@ -20,8 +19,9 @@ public class DashboardController {
 
     @GetMapping
     public GlobalResponse<DashboardResponse> getDashboard(
-            @AuthenticationPrincipal UserPrincipal principal
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam String workspaceSlug
     ) {
-        return GlobalResponse.success(HttpStatus.OK.value(), dashboardService.getDashboard(principal.getId()));
+        return GlobalResponse.success(HttpStatus.OK.value(), dashboardService.getDashboard(principal.getId(), workspaceSlug));
     }
 }
