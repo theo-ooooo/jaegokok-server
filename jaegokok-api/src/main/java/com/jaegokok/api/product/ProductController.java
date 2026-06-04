@@ -49,23 +49,23 @@ public class ProductController {
     @GetMapping
     public GlobalResponse<Page<ProductResponse>> findAll(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestParam String workspaceSlug,
+            @RequestParam Long workspaceId,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Boolean lowStock,
             @PageableDefault(size = 20) Pageable pageable
     ) {
         ProductSearchCondition condition = new ProductSearchCondition(name, category, lowStock);
-        return GlobalResponse.success(HttpStatus.OK.value(), productService.findAll(principal.getId(), workspaceSlug, condition, pageable));
+        return GlobalResponse.success(HttpStatus.OK.value(), productService.findAll(principal.getId(), workspaceId, condition, pageable));
     }
 
     @GetMapping("/{id}")
     public GlobalResponse<ProductResponse> findById(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestParam String workspaceSlug,
+            @RequestParam Long workspaceId,
             @PathVariable Long id
     ) {
-        return GlobalResponse.success(HttpStatus.OK.value(), productService.findById(principal.getId(), workspaceSlug, id));
+        return GlobalResponse.success(HttpStatus.OK.value(), productService.findById(principal.getId(), workspaceId, id));
     }
 
     @PatchMapping("/{id}")

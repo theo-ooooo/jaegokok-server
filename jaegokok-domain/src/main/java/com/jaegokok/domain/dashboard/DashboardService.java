@@ -6,7 +6,6 @@ import com.jaegokok.core.inventory.InventoryType;
 import com.jaegokok.domain.dashboard.dto.DashboardResponse;
 import com.jaegokok.domain.dashboard.dto.LowStockProduct;
 import com.jaegokok.domain.workspace.WorkspaceMemberRepository;
-import com.jaegokok.domain.workspace.WorkspaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,16 +22,12 @@ public class DashboardService {
     private static final int LOW_STOCK_PREVIEW_LIMIT = 10;
 
     private final DashboardRepository dashboardRepository;
-    private final WorkspaceRepository workspaceRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
 
-    public DashboardResponse getDashboard(Long memberId, String workspaceSlug) {
-        com.jaegokok.domain.workspace.Workspace ws = workspaceRepository.findBySlug(workspaceSlug)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(ws.id(), memberId)) {
+    public DashboardResponse getDashboard(Long memberId, Long workspaceId) {
+        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(workspaceId, memberId)) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
-        Long workspaceId = ws.id();
 
         LocalDate today = LocalDate.now();
         long totalProducts = dashboardRepository.countProducts(workspaceId);

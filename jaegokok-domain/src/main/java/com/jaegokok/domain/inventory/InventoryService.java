@@ -26,13 +26,11 @@ public class InventoryService {
     private final WorkspaceMemberRepository workspaceMemberRepository;
     private final WorkspaceRepository workspaceRepository;
 
-    public Page<InventoryHistoryResponse> getHistory(Long memberId, String workspaceSlug, InventoryHistoryCondition condition, Pageable pageable) {
-        com.jaegokok.domain.workspace.Workspace workspace = workspaceRepository.findBySlug(workspaceSlug)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(workspace.id(), memberId)) {
+    public Page<InventoryHistoryResponse> getHistory(Long memberId, Long workspaceId, InventoryHistoryCondition condition, Pageable pageable) {
+        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(workspaceId, memberId)) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
-        return inventoryRecordRepository.findByCondition(workspace.id(), condition, pageable)
+        return inventoryRecordRepository.findByCondition(workspaceId, condition, pageable)
                 .map(InventoryHistoryResponse::from);
     }
 
