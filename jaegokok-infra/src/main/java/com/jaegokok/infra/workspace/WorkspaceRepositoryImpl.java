@@ -86,6 +86,14 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
         return toWorkspace(entity);
     }
 
+    @Override
+    public Workspace updateSlug(Long workspaceId, String slug) {
+        WorkspaceEntity entity = workspaceJpaRepository.findById(workspaceId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        entity.updateSlug(slug);
+        return toWorkspace(entity);
+    }
+
     private Workspace toWorkspace(WorkspaceEntity e) {
         Image logo = imageJpaRepository.findFirstByEntityTypeAndEntityId(ImageEntityType.WORKSPACE, e.getId())
                 .map(img -> new Image(img.getId(), img.getEntityType(), img.getEntityId(), img.getOriginalPath(), img.getWebpPath(), img.getBucket(), img.getCreatedAt()))
