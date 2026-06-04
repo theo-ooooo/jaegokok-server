@@ -4,5 +4,5 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties(TossProperties.class)
+@EnableConfigurationProperties({TossProperties.class, AppProperties.class})
 public class TossConfig {}
