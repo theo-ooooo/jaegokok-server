@@ -52,6 +52,19 @@ public class WorkspaceController {
         return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.updateProfile(principal.getId(), request));
     }
 
+    @GetMapping("/check-slug")
+    public GlobalResponse<Boolean> checkSlugAvailable(@RequestParam String slug) {
+        return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.isSlugAvailable(slug));
+    }
+
+    @PatchMapping("/me/slug")
+    public GlobalResponse<WorkspaceResponse> updateSlug(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam String slug
+    ) {
+        return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.updateSlug(principal.getId(), slug));
+    }
+
     @PostMapping(value = "/me/logo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public GlobalResponse<WorkspaceResponse> uploadLogo(
             @AuthenticationPrincipal UserPrincipal principal,

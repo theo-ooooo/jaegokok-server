@@ -233,6 +233,27 @@ public class WorkspaceService {
         return WorkspaceResponse.from(updated, trial, fileUploadPort);
     }
 
+    @Transactional(readOnly = true)
+    public boolean isSlugAvailable(String slug) {
+        if (!slug.matches("^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$")) return false;
+        return !workspaceRepository.existsBySlug(slug);
+    }
+
+    @Transactional
+    public WorkspaceResponse updateSlug(Long memberId, String newSlug) {
+        Workspace workspace = workspaceRepository.findByOwnerId(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        if (!newSlug.matches("^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$")) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+        if (!newSlug.equals(workspace.slug()) && workspaceRepository.existsBySlug(newSlug)) {
+            throw new CustomException(ErrorCode.WORKSPACE_SLUG_ALREADY_EXISTS);
+        }
+        Workspace updated = workspaceRepository.updateSlug(workspace.id(), newSlug);
+        Optional<WorkspaceTrial> trial = workspaceTrialRepository.findByWorkspaceId(updated.id());
+        return WorkspaceResponse.from(updated, trial, fileUploadPort);
+    }
+
     private String tryConvertAndUploadWebp(String directory, String originalFilename, byte[] content) {
         try {
             byte[] webpBytes = imageEncoderPort.toWebp(content);
