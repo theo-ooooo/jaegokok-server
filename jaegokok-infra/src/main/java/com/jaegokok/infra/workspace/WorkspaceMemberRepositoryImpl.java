@@ -83,6 +83,11 @@ public class WorkspaceMemberRepositoryImpl implements WorkspaceMemberRepository 
         return workspaceMemberQueryRepository.existsByWorkspaceIdAndEmail(workspaceId, email);
     }
 
+    @Override
+    public long countByWorkspaceId(Long workspaceId) {
+        return workspaceMemberJpaRepository.countByWorkspace_Id(workspaceId);
+    }
+
     private WorkspaceMember toWorkspaceMember(WorkspaceMemberEntity entity) {
         return new WorkspaceMember(
                 entity.getId(),

@@ -45,6 +45,7 @@ public enum ErrorCode {
     // Product
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
     PRODUCT_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "플랜의 상품 등록 한도를 초과했습니다."),
+    MEMBER_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "플랜의 직원 등록 한도를 초과했습니다."),
 
     // Inventory
     INSUFFICIENT_STOCK(HttpStatus.BAD_REQUEST, "재고가 부족합니다."),
