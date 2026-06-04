@@ -1,0 +1,58 @@
+package com.jaegokok.core.payment;
+
+import com.jaegokok.core.BaseEntity;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "payments")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class PaymentEntity extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "workspace_id", nullable = false)
+    private Long workspaceId;
+
+    @Column(name = "order_id", nullable = false, unique = true, length = 100)
+    private String orderId;
+
+    @Column(name = "payment_key", length = 200)
+    private String paymentKey;
+
+    @Column(name = "plan_key", nullable = false, length = 20)
+    private String planKey;
+
+    @Column(nullable = false)
+    private int amount;
+
+    @Column(nullable = false, length = 20)
+    private String status = "PENDING";
+
+    @Column(name = "toss_response", columnDefinition = "TEXT")
+    private String tossResponse;
+
+    public static PaymentEntity create(Long workspaceId, String orderId, String planKey, int amount) {
+        PaymentEntity e = new PaymentEntity();
+        e.workspaceId = workspaceId;
+        e.orderId = orderId;
+        e.planKey = planKey;
+        e.amount = amount;
+        return e;
+    }
+
+    public void confirm(String paymentKey, String tossResponse) {
+        this.paymentKey = paymentKey;
+        this.tossResponse = tossResponse;
+        this.status = "DONE";
+    }
+
+    public void fail() {
+        this.status = "FAILED";
+    }
+}
