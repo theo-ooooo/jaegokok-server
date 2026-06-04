@@ -8,6 +8,8 @@ import com.jaegokok.core.workspace.WorkspaceMemberRole;
 import com.jaegokok.core.workspace.WorkspacePlan;
 import com.jaegokok.domain.app.AppConfigPort;
 import com.jaegokok.domain.email.EmailPort;
+import com.jaegokok.domain.subscription.SubscriptionPlan;
+import com.jaegokok.domain.subscription.SubscriptionPlanRepository;
 import com.jaegokok.domain.file.FileUploadPort;
 import com.jaegokok.domain.file.ImageEncoderPort;
 import com.jaegokok.domain.image.ImageRepository;
@@ -41,6 +43,7 @@ public class WorkspaceService {
     private final WorkspaceInvitationRepository workspaceInvitationRepository;
     private final EmailPort emailPort;
     private final AppConfigPort appConfigPort;
+    private final SubscriptionPlanRepository subscriptionPlanRepository;
 
     @Transactional(readOnly = true)
     public WorkspaceResponse getMyWorkspace(Long memberId) {
@@ -131,6 +134,14 @@ public class WorkspaceService {
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED));
         if (workspaceMemberRepository.existsByWorkspaceIdAndEmail(workspace.id(), email)) {
             throw new CustomException(ErrorCode.WORKSPACE_MEMBER_ALREADY_EXISTS);
+        }
+        SubscriptionPlan plan = subscriptionPlanRepository.findByPlanKey(
+                getEffectivePlan(workspace.id()).name()).orElse(null);
+        if (plan != null && plan.memberLimit() >= 0) {
+            long currentCount = workspaceMemberRepository.countByWorkspaceId(workspace.id());
+            if (currentCount >= plan.memberLimit()) {
+                throw new CustomException(ErrorCode.MEMBER_LIMIT_EXCEEDED);
+            }
         }
         WorkspaceInvitation invitation = workspaceInvitationRepository.save(workspace.id(), email, role);
         String inviteUrl = appConfigPort.getBaseUrl() + "/signup?invite=" + invitation.token();

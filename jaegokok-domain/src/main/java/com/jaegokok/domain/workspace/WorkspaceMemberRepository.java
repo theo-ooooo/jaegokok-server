@@ -15,4 +15,5 @@ public interface WorkspaceMemberRepository {
     void deleteById(Long id);
     boolean existsByWorkspaceIdAndMemberId(Long workspaceId, Long memberId);
     boolean existsByWorkspaceIdAndEmail(Long workspaceId, String email);
+    long countByWorkspaceId(Long workspaceId);
 }
