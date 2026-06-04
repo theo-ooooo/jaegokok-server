@@ -5,7 +5,7 @@ import com.jaegokok.domain.payment.Payment;
 public record PaymentResponse(
         Long id,
         String orderId,
-        String planKey,
+        Long planId,
         int amount,
         String status
 ) {
@@ -13,7 +13,7 @@ public record PaymentResponse(
         return new PaymentResponse(
                 payment.id(),
                 payment.orderId(),
-                payment.planKey(),
+                payment.planId(),
                 payment.amount(),
                 payment.status()
         );

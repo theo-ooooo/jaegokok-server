@@ -17,8 +17,8 @@ public class PaymentRepositoryImpl implements PaymentRepository {
     private final PaymentJpaRepository paymentJpaRepository;
 
     @Override
-    public Payment save(Long workspaceId, String orderId, String planKey, int amount) {
-        PaymentEntity entity = PaymentEntity.create(workspaceId, orderId, planKey, amount);
+    public Payment save(Long workspaceId, String orderId, Long planId, int amount) {
+        PaymentEntity entity = PaymentEntity.create(workspaceId, orderId, planId, amount);
         return toPayment(paymentJpaRepository.save(entity));
     }
 
@@ -43,6 +43,6 @@ public class PaymentRepositoryImpl implements PaymentRepository {
 
     private Payment toPayment(PaymentEntity e) {
         return new Payment(e.getId(), e.getWorkspaceId(), e.getOrderId(), e.getPaymentKey(),
-                e.getPlanKey(), e.getAmount(), e.getStatus());
+                e.getPlanId(), e.getAmount(), e.getStatus());
     }
 }

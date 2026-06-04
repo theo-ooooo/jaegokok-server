@@ -27,8 +27,8 @@ public class WorkspaceBillingEntity extends BaseEntity {
     @Column(name = "customer_key", nullable = false, length = 100)
     private String customerKey;
 
-    @Column(name = "plan_key", nullable = false, length = 20)
-    private String planKey;
+    @Column(name = "plan_id", nullable = false)
+    private Long planId;
 
     @Column(nullable = false, length = 20)
     private String status = "ACTIVE";
@@ -36,12 +36,12 @@ public class WorkspaceBillingEntity extends BaseEntity {
     @Column(name = "next_billing_date", nullable = false)
     private LocalDate nextBillingDate;
 
-    public static WorkspaceBillingEntity create(Long workspaceId, String billingKey, String customerKey, String planKey) {
+    public static WorkspaceBillingEntity create(Long workspaceId, String billingKey, String customerKey, Long planId) {
         WorkspaceBillingEntity e = new WorkspaceBillingEntity();
         e.workspaceId = workspaceId;
         e.billingKey = billingKey;
         e.customerKey = customerKey;
-        e.planKey = planKey;
+        e.planId = planId;
         e.status = "ACTIVE";
         e.nextBillingDate = LocalDate.now().plusMonths(1);
         return e;

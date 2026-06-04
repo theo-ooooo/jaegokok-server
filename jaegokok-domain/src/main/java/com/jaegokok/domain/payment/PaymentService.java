@@ -3,6 +3,7 @@ package com.jaegokok.domain.payment;
 import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.core.workspace.WorkspacePlan;
+import com.jaegokok.domain.subscription.SubscriptionPlan;
 import com.jaegokok.domain.subscription.SubscriptionPlanRepository;
 import com.jaegokok.domain.workspace.Workspace;
 import com.jaegokok.domain.workspace.WorkspaceRepository;
@@ -24,10 +25,9 @@ public class PaymentService {
 
     public Payment confirmPayment(Long memberId, String paymentKey, String orderId, int amount, String planKey) {
         // 1. Validate amount against subscription plan price
-        int expectedAmount = subscriptionPlanRepository.findByPlanKey(planKey)
-                .map(sp -> sp.priceKrw())
+        SubscriptionPlan plan = subscriptionPlanRepository.findByPlanKey(planKey)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
-        if (amount != expectedAmount) {
+        if (amount != plan.priceKrw()) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
@@ -36,7 +36,7 @@ public class PaymentService {
                 .orElseGet(() -> {
                     Workspace ws = workspaceRepository.findByOwnerId(memberId)
                             .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-                    return paymentRepository.save(ws.id(), orderId, planKey, amount);
+                    return paymentRepository.save(ws.id(), orderId, plan.id(), amount);
                 });
 
         // 3. Call Toss Payments API

@@ -5,7 +5,7 @@ public record Payment(
         Long workspaceId,
         String orderId,
         String paymentKey,
-        String planKey,
+        Long planId,
         int amount,
         String status
 ) {}

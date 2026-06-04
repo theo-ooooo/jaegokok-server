@@ -7,7 +7,7 @@ public record WorkspaceBilling(
         Long workspaceId,
         String billingKey,
         String customerKey,
-        String planKey,
+        Long planId,
         String status,
         LocalDate nextBillingDate
 ) {}

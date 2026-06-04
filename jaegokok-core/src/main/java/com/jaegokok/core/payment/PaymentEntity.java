@@ -25,8 +25,8 @@ public class PaymentEntity extends BaseEntity {
     @Column(name = "payment_key", length = 200)
     private String paymentKey;
 
-    @Column(name = "plan_key", nullable = false, length = 20)
-    private String planKey;
+    @Column(name = "plan_id", nullable = false)
+    private Long planId;
 
     @Column(nullable = false)
     private int amount;
@@ -37,11 +37,11 @@ public class PaymentEntity extends BaseEntity {
     @Column(name = "toss_response", columnDefinition = "TEXT")
     private String tossResponse;
 
-    public static PaymentEntity create(Long workspaceId, String orderId, String planKey, int amount) {
+    public static PaymentEntity create(Long workspaceId, String orderId, Long planId, int amount) {
         PaymentEntity e = new PaymentEntity();
         e.workspaceId = workspaceId;
         e.orderId = orderId;
-        e.planKey = planKey;
+        e.planId = planId;
         e.amount = amount;
         return e;
     }

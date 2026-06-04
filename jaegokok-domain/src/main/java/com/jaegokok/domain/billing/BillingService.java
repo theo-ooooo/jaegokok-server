@@ -53,9 +53,9 @@ public class BillingService {
 
         if (!chargeResult.success()) throw new CustomException(ErrorCode.PAYMENT_FAILED);
 
-        workspaceBillingRepository.save(workspace.id(), keyResult.billingKey(), customerKey, planKey);
+        workspaceBillingRepository.save(workspace.id(), keyResult.billingKey(), customerKey, plan.id());
 
-        Payment payment = paymentRepository.save(workspace.id(), orderId, planKey, plan.priceKrw());
+        Payment payment = paymentRepository.save(workspace.id(), orderId, plan.id(), plan.priceKrw());
         paymentRepository.confirm(payment.id(), orderId, chargeResult.message());
 
         workspaceRepository.updatePlan(workspace.id(), WorkspacePlan.valueOf(planKey));
@@ -66,15 +66,15 @@ public class BillingService {
         List<WorkspaceBilling> due = workspaceBillingRepository.findAllDueForBilling(LocalDate.now());
         for (WorkspaceBilling billing : due) {
             try {
-                SubscriptionPlan plan = subscriptionPlanRepository.findByPlanKey(billing.planKey()).orElse(null);
+                SubscriptionPlan plan = subscriptionPlanRepository.findById(billing.planId()).orElse(null);
                 if (plan == null) continue;
-                String orderId = "JAEGOK-RENEW-" + billing.planKey() + "-" + System.currentTimeMillis();
+                String orderId = "JAEGOK-RENEW-" + plan.planKey() + "-" + System.currentTimeMillis();
                 String orderName = "재고콕 " + plan.name() + " 플랜 (갱신)";
                 TossPaymentPort.TossConfirmResult result = tossPaymentPort.chargeWithBillingKey(
                         billing.billingKey(), orderId, orderName, plan.priceKrw(), billing.customerKey());
                 if (result.success()) {
                     workspaceBillingRepository.renewNextDate(billing.id());
-                    Payment payment = paymentRepository.save(billing.workspaceId(), orderId, billing.planKey(), plan.priceKrw());
+                    Payment payment = paymentRepository.save(billing.workspaceId(), orderId, billing.planId(), plan.priceKrw());
                     paymentRepository.confirm(payment.id(), orderId, result.message());
                 }
             } catch (Exception e) {

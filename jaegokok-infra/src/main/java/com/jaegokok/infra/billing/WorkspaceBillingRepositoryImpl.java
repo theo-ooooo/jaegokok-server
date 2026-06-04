@@ -19,8 +19,8 @@ public class WorkspaceBillingRepositoryImpl implements WorkspaceBillingRepositor
     private final WorkspaceBillingJpaRepository workspaceBillingJpaRepository;
 
     @Override
-    public WorkspaceBilling save(Long workspaceId, String billingKey, String customerKey, String planKey) {
-        WorkspaceBillingEntity entity = WorkspaceBillingEntity.create(workspaceId, billingKey, customerKey, planKey);
+    public WorkspaceBilling save(Long workspaceId, String billingKey, String customerKey, Long planId) {
+        WorkspaceBillingEntity entity = WorkspaceBillingEntity.create(workspaceId, billingKey, customerKey, planId);
         return toBilling(workspaceBillingJpaRepository.save(entity));
     }
 
@@ -56,7 +56,7 @@ public class WorkspaceBillingRepositoryImpl implements WorkspaceBillingRepositor
                 e.getWorkspaceId(),
                 e.getBillingKey(),
                 e.getCustomerKey(),
-                e.getPlanKey(),
+                e.getPlanId(),
                 e.getStatus(),
                 e.getNextBillingDate()
         );
