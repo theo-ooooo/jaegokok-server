@@ -16,4 +16,6 @@ public interface MemberRepository {
 
     // 로그인 비밀번호 검증용 — 해시된 비밀번호 반환
     String findEncodedPasswordByEmail(String email);
+
+    void updatePassword(Long memberId, String encodedPassword);
 }

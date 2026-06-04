@@ -50,4 +50,8 @@ public class MemberEntity extends BaseEntity {
     public void withdraw() {
         this.status = MemberStatus.WITHDRAWN;
     }
+
+    public void updatePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }

@@ -58,6 +58,13 @@ public class MemberRepositoryImpl implements MemberRepository {
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
+    @Override
+    public void updatePassword(Long memberId, String encodedPassword) {
+        MemberEntity entity = memberJpaRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        entity.updatePassword(encodedPassword);
+    }
+
     private Member toMember(MemberEntity entity) {
         return new Member(entity.getId(), entity.getEmail(), entity.getNickname(), entity.getRole(), entity.getStatus(), entity.getCreatedAt());
     }

@@ -3,6 +3,7 @@ package com.jaegokok.api.auth;
 import com.jaegokok.api.util.CookieUtils;
 import com.jaegokok.common.response.GlobalResponse;
 import com.jaegokok.domain.member.MemberService;
+import com.jaegokok.domain.member.PasswordResetService;
 import com.jaegokok.domain.member.dto.LoginRequest;
 import com.jaegokok.domain.member.dto.LoginResponse;
 import com.jaegokok.domain.member.dto.LoginResult;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final MemberService memberService;
+    private final PasswordResetService passwordResetService;
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
@@ -45,6 +47,18 @@ public class AuthController {
     public GlobalResponse<Void> logout(@CookieValue(name = "refreshToken", required = false) String refreshToken, HttpServletResponse response) {
         memberService.logout(refreshToken);
         CookieUtils.clearRefreshToken(response);
+        return GlobalResponse.success(HttpStatus.OK.value(), null);
+    }
+
+    @PostMapping("/forgot-password")
+    public GlobalResponse<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.forgotPassword(request.email());
+        return GlobalResponse.success(HttpStatus.OK.value(), null);
+    }
+
+    @PostMapping("/reset-password")
+    public GlobalResponse<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.token(), request.newPassword());
         return GlobalResponse.success(HttpStatus.OK.value(), null);
     }
 }
