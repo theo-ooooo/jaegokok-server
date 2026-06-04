@@ -54,9 +54,12 @@ public class WorkspaceService {
     }
 
     @Transactional(readOnly = true)
-    public WorkspaceResponse getWorkspaceBySlug(String slug) {
+    public WorkspaceResponse getWorkspaceBySlug(Long requesterId, String slug) {
         Workspace workspace = workspaceRepository.findBySlug(slug)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        workspaceMemberRepository.findByMemberId(requesterId)
+                .filter(m -> m.workspaceId().equals(workspace.id()))
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED));
         Optional<WorkspaceTrial> trial = workspaceTrialRepository.findByWorkspaceId(workspace.id());
         return WorkspaceResponse.from(workspace, trial, fileUploadPort);
     }
