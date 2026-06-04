@@ -34,13 +34,18 @@ public class WorkspaceInvitationEntity extends BaseEntity {
     @Column(nullable = false)
     private boolean used = false;
 
-    public static WorkspaceInvitationEntity create(Long workspaceId, String email) {
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private WorkspaceMemberRole role = WorkspaceMemberRole.EMPLOYEE;
+
+    public static WorkspaceInvitationEntity create(Long workspaceId, String email, WorkspaceMemberRole role) {
         WorkspaceInvitationEntity entity = new WorkspaceInvitationEntity();
         entity.workspaceId = workspaceId;
         entity.email = email;
         entity.token = UUID.randomUUID().toString();
         entity.expiresAt = LocalDateTime.now().plusDays(7);
         entity.used = false;
+        entity.role = role;
         return entity;
     }
 

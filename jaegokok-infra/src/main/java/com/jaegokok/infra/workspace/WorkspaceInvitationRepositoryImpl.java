@@ -3,6 +3,7 @@ package com.jaegokok.infra.workspace;
 import com.jaegokok.common.ErrorCode;
 import com.jaegokok.common.exception.CustomException;
 import com.jaegokok.core.workspace.WorkspaceInvitationEntity;
+import com.jaegokok.core.workspace.WorkspaceMemberRole;
 import com.jaegokok.domain.workspace.WorkspaceInvitation;
 import com.jaegokok.domain.workspace.WorkspaceInvitationRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,8 @@ public class WorkspaceInvitationRepositoryImpl implements WorkspaceInvitationRep
     private final WorkspaceInvitationJpaRepository workspaceInvitationJpaRepository;
 
     @Override
-    public WorkspaceInvitation save(Long workspaceId, String email) {
-        WorkspaceInvitationEntity entity = WorkspaceInvitationEntity.create(workspaceId, email);
+    public WorkspaceInvitation save(Long workspaceId, String email, WorkspaceMemberRole role) {
+        WorkspaceInvitationEntity entity = WorkspaceInvitationEntity.create(workspaceId, email, role);
         return toWorkspaceInvitation(workspaceInvitationJpaRepository.save(entity));
     }
 
@@ -48,7 +49,8 @@ public class WorkspaceInvitationRepositoryImpl implements WorkspaceInvitationRep
                 e.getEmail(),
                 e.getToken(),
                 e.getExpiresAt(),
-                e.isUsed()
+                e.isUsed(),
+                e.getRole()
         );
     }
 }

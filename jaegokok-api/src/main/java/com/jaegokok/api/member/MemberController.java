@@ -39,7 +39,7 @@ public class MemberController {
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody InviteByEmailRequest request
     ) {
-        workspaceService.inviteMember(principal.getId(), request.email());
+        workspaceService.inviteMember(principal.getId(), request.email(), request.role());
         return GlobalResponse.success(HttpStatus.CREATED.value(), null);
     }
 

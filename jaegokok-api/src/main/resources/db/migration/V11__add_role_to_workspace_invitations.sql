@@ -1,0 +1,2 @@
+ALTER TABLE workspace_invitations
+    ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'EMPLOYEE';

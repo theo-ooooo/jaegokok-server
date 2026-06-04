@@ -126,13 +126,13 @@ public class WorkspaceService {
     }
 
     @Transactional
-    public void inviteMember(Long inviterId, String email) {
+    public void inviteMember(Long inviterId, String email, WorkspaceMemberRole role) {
         Workspace workspace = workspaceRepository.findByOwnerId(inviterId)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED));
         if (workspaceMemberRepository.existsByWorkspaceIdAndEmail(workspace.id(), email)) {
             throw new CustomException(ErrorCode.WORKSPACE_MEMBER_ALREADY_EXISTS);
         }
-        WorkspaceInvitation invitation = workspaceInvitationRepository.save(workspace.id(), email);
+        WorkspaceInvitation invitation = workspaceInvitationRepository.save(workspace.id(), email, role);
         String inviteUrl = appConfigPort.getBaseUrl() + "/signup?invite=" + invitation.token();
         emailPort.sendInvitation(email, inviteUrl);
     }
@@ -164,7 +164,7 @@ public class WorkspaceService {
             throw new CustomException(ErrorCode.INVITATION_ALREADY_USED);
         }
         if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(invitation.workspaceId(), memberId)) {
-            workspaceMemberRepository.save(invitation.workspaceId(), memberId, WorkspaceMemberRole.EMPLOYEE);
+            workspaceMemberRepository.save(invitation.workspaceId(), memberId, invitation.role());
         }
     }
 
