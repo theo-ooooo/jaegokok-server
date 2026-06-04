@@ -19,19 +19,27 @@ import com.jaegokok.domain.workspace.WorkspaceMemberRepository;
 import com.jaegokok.api.util.FileValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("/api/v1/workspaces/{workspaceId}")
@@ -113,5 +121,59 @@ public class WorkspaceResourceController {
         checkAccess(principal.getId(), workspaceId);
         InventoryHistoryCondition condition = new InventoryHistoryCondition(productId, type, dateFrom, dateTo);
         return GlobalResponse.success(HttpStatus.OK.value(), inventoryService.getHistoryByWorkspace(workspaceId, condition, pageable));
+    }
+
+    @GetMapping("/inventory/history/excel")
+    public ResponseEntity<byte[]> downloadInventoryExcel(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long workspaceId,
+            @RequestParam(required = false) Long productId,
+            @RequestParam(required = false) InventoryType type,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateTo
+    ) throws IOException {
+        checkAccess(principal.getId(), workspaceId);
+        InventoryHistoryCondition condition = new InventoryHistoryCondition(productId, type, dateFrom, dateTo);
+        Page<InventoryHistoryResponse> page = inventoryService.getHistoryByWorkspace(workspaceId, condition, PageRequest.of(0, 10000));
+
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("입출고 내역");
+
+            // Header row
+            String[] headers = {"일시", "유형", "상품명", "수량", "담당자", "메모"};
+            Row header = sheet.createRow(0);
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font font = workbook.createFont();
+            font.setBold(true);
+            headerStyle.setFont(font);
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = header.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+            }
+
+            // Data rows
+            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            int rowNum = 1;
+            for (InventoryHistoryResponse r : page.getContent()) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(r.createdAt().format(fmt));
+                row.createCell(1).setCellValue(r.type().name().equals("IN") ? "입고" : "출고");
+                row.createCell(2).setCellValue(r.productName());
+                row.createCell(3).setCellValue(r.quantity());
+                row.createCell(4).setCellValue(r.createdByNickname());
+                row.createCell(5).setCellValue(r.note() != null ? r.note() : "");
+            }
+            for (int i = 0; i < headers.length; i++) sheet.autoSizeColumn(i);
+
+            workbook.write(out);
+            byte[] bytes = out.toByteArray();
+
+            String filename = URLEncoder.encode("입출고내역.xlsx", StandardCharsets.UTF_8);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + filename)
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .body(bytes);
+        }
     }
 }

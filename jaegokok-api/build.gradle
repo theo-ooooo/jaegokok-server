@@ -27,4 +27,7 @@ dependencies {
 
     runtimeOnly 'com.mysql:mysql-connector-j'
     implementation 'org.flywaydb:flyway-mysql'
+
+    // Apache POI (Excel export)
+    implementation 'org.apache.poi:poi-ooxml:5.3.0'
 }
