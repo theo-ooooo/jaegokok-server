@@ -102,10 +102,9 @@ public class ProductService {
 
     @Transactional
     public ProductResponse update(Long memberId, Long productId, UpdateProductRequest request) {
-        Workspace workspace = getOwnerWorkspace(memberId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        if (!product.workspaceId().equals(workspace.id())) {
+        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(product.workspaceId(), memberId)) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
         return ProductResponse.from(productRepository.update(productId, request), fileUploadPort);
