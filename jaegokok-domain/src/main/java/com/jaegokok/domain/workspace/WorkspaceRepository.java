@@ -16,4 +16,5 @@ public interface WorkspaceRepository {
     boolean existsBySlug(String slug);
     Workspace updateProfile(Long ownerId, String name, String businessNumber, String address, String phone);
     Workspace updatePlan(Long workspaceId, WorkspacePlan plan);
+    Workspace updateSlug(Long workspaceId, String slug);
 }
