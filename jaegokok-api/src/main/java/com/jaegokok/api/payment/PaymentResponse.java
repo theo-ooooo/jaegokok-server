@@ -7,7 +7,8 @@ public record PaymentResponse(
         String orderId,
         Long planId,
         int amount,
-        String status
+        String status,
+        Long billingId
 ) {
     public static PaymentResponse from(Payment payment) {
         return new PaymentResponse(
@@ -15,7 +16,8 @@ public record PaymentResponse(
                 payment.orderId(),
                 payment.planId(),
                 payment.amount(),
-                payment.status()
+                payment.status(),
+                payment.billingId()
         );
     }
 }

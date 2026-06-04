@@ -12,7 +12,6 @@ import com.jaegokok.domain.workspace.Workspace;
 import com.jaegokok.domain.workspace.WorkspaceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,16 +52,16 @@ public class BillingService {
 
         if (!chargeResult.success()) throw new CustomException(ErrorCode.PAYMENT_FAILED);
 
-        workspaceBillingRepository.save(workspace.id(), keyResult.billingKey(), customerKey, plan.id());
+        WorkspaceBilling billing = workspaceBillingRepository.save(workspace.id(), keyResult.billingKey(), customerKey, plan.id());
 
-        Payment payment = paymentRepository.save(workspace.id(), orderId, plan.id(), plan.priceKrw());
+        Payment payment = paymentRepository.save(workspace.id(), orderId, plan.id(), plan.priceKrw(), billing.id());
         paymentRepository.confirm(payment.id(), orderId, chargeResult.message());
 
         workspaceRepository.updatePlan(workspace.id(), WorkspacePlan.valueOf(planKey));
     }
 
-    @Scheduled(cron = "0 0 9 * * *")
-    public void processScheduledBillings() {
+    @Transactional
+    public void processDueBillings() {
         List<WorkspaceBilling> due = workspaceBillingRepository.findAllDueForBilling(LocalDate.now());
         for (WorkspaceBilling billing : due) {
             try {
@@ -74,7 +73,7 @@ public class BillingService {
                         billing.billingKey(), orderId, orderName, plan.priceKrw(), billing.customerKey());
                 if (result.success()) {
                     workspaceBillingRepository.renewNextDate(billing.id());
-                    Payment payment = paymentRepository.save(billing.workspaceId(), orderId, billing.planId(), plan.priceKrw());
+                    Payment payment = paymentRepository.save(billing.workspaceId(), orderId, billing.planId(), plan.priceKrw(), billing.id());
                     paymentRepository.confirm(payment.id(), orderId, result.message());
                 }
             } catch (Exception e) {

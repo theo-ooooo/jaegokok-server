@@ -36,7 +36,7 @@ public class PaymentService {
                 .orElseGet(() -> {
                     Workspace ws = workspaceRepository.findByOwnerId(memberId)
                             .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-                    return paymentRepository.save(ws.id(), orderId, plan.id(), amount);
+                    return paymentRepository.save(ws.id(), orderId, plan.id(), amount, null);
                 });
 
         // 3. Call Toss Payments API

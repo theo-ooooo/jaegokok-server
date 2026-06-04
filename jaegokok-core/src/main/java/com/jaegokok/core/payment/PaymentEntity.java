@@ -37,12 +37,16 @@ public class PaymentEntity extends BaseEntity {
     @Column(name = "toss_response", columnDefinition = "TEXT")
     private String tossResponse;
 
-    public static PaymentEntity create(Long workspaceId, String orderId, Long planId, int amount) {
+    @Column(name = "billing_id")
+    private Long billingId;
+
+    public static PaymentEntity create(Long workspaceId, String orderId, Long planId, int amount, Long billingId) {
         PaymentEntity e = new PaymentEntity();
         e.workspaceId = workspaceId;
         e.orderId = orderId;
         e.planId = planId;
         e.amount = amount;
+        e.billingId = billingId;
         return e;
     }
 

@@ -7,5 +7,6 @@ public record Payment(
         String paymentKey,
         Long planId,
         int amount,
-        String status
+        String status,
+        Long billingId
 ) {}
