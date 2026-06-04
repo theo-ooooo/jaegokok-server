@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface WorkspaceJpaRepository extends JpaRepository<WorkspaceEntity, Long> {
     boolean existsByOwner_Id(Long ownerId);
     Optional<WorkspaceEntity> findByOwner_Id(Long ownerId);
+    Optional<WorkspaceEntity> findBySlug(String slug);
+    boolean existsBySlug(String slug);
 }

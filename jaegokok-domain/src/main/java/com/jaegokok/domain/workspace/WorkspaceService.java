@@ -20,11 +20,13 @@ import com.jaegokok.domain.workspace.dto.UpdateMemberRoleRequest;
 import com.jaegokok.domain.workspace.dto.UpdateWorkspaceProfileRequest;
 import com.jaegokok.domain.workspace.dto.WorkspaceMemberResponse;
 import com.jaegokok.domain.workspace.dto.WorkspaceResponse;
+import com.jaegokok.domain.workspace.dto.WorkspaceSummaryResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,6 +54,27 @@ public class WorkspaceService {
         Workspace workspace = workspaceRepository.findById(membership.workspaceId())
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
         return WorkspaceResponse.from(workspace, workspaceTrialRepository.findByWorkspaceId(workspace.id()), membership, fileUploadPort);
+    }
+
+    @Transactional(readOnly = true)
+    public WorkspaceResponse getWorkspaceBySlug(Long requesterId, String slug) {
+        Workspace workspace = workspaceRepository.findBySlug(slug)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        workspaceMemberRepository.findByMemberId(requesterId)
+                .filter(m -> m.workspaceId().equals(workspace.id()))
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED));
+        Optional<WorkspaceTrial> trial = workspaceTrialRepository.findByWorkspaceId(workspace.id());
+        return WorkspaceResponse.from(workspace, trial, fileUploadPort);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkspaceSummaryResponse> listMyWorkspaces(Long memberId) {
+        return workspaceMemberRepository.findAllByMemberId(memberId).stream()
+                .map(wm -> workspaceRepository.findById(wm.workspaceId())
+                        .map(ws -> new WorkspaceSummaryResponse(ws.id(), ws.name(), ws.slug(), wm.role().name()))
+                        .orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -123,7 +146,8 @@ public class WorkspaceService {
         if (workspaceRepository.existsByOwnerId(memberId)) {
             throw new CustomException(ErrorCode.WORKSPACE_ALREADY_EXISTS);
         }
-        Workspace workspace = workspaceRepository.save(memberId, request.name(), request.description(), WorkspacePlan.FREE);
+        String slug = resolveSlug(request.slug(), request.name());
+        Workspace workspace = workspaceRepository.saveWithSlug(memberId, request.name(), request.description(), WorkspacePlan.FREE, slug);
         workspaceMemberRepository.save(workspace.id(), memberId, WorkspaceMemberRole.OWNER);
         return WorkspaceResponse.from(workspace, Optional.empty(), fileUploadPort);
     }
@@ -236,5 +260,45 @@ public class WorkspaceService {
         WorkspaceTrial trial = workspaceTrialRepository.save(workspace.id());
         workspaceRepository.updatePlan(workspace.id(), WorkspacePlan.PRO);
         return WorkspaceResponse.from(workspace, Optional.of(trial), fileUploadPort);
+    }
+
+    /**
+     * Resolves the slug to use: uses the provided slug if valid and unique,
+     * otherwise auto-generates from the workspace name.
+     */
+    private String resolveSlug(String requestedSlug, String name) {
+        if (requestedSlug != null && !requestedSlug.isBlank()) {
+            if (workspaceRepository.existsBySlug(requestedSlug)) {
+                throw new CustomException(ErrorCode.WORKSPACE_SLUG_ALREADY_EXISTS);
+            }
+            return requestedSlug;
+        }
+        return generateUniqueSlug(name);
+    }
+
+    /**
+     * Auto-generates a URL-safe slug from a workspace name.
+     * Normalizes Unicode, lowercases, replaces spaces/special chars with hyphens, truncates to 30 chars.
+     * Appends a numeric suffix if a collision is found.
+     */
+    private String generateUniqueSlug(String name) {
+        String base = Normalizer.normalize(name, Normalizer.Form.NFD)
+                .replaceAll("[^\\p{ASCII}]", "")
+                .toLowerCase()
+                .trim()
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-+|-+$", "");
+        if (base.isEmpty()) base = "workspace";
+        if (base.length() > 30) base = base.substring(0, 30).replaceAll("-+$", "");
+
+        String candidate = base;
+        int suffix = 2;
+        while (workspaceRepository.existsBySlug(candidate)) {
+            String suffixStr = "-" + suffix;
+            int maxBase = 30 - suffixStr.length();
+            candidate = (base.length() > maxBase ? base.substring(0, maxBase) : base) + suffixStr;
+            suffix++;
+        }
+        return candidate;
     }
 }

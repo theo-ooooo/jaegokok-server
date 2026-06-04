@@ -29,6 +29,13 @@ public class WorkspaceController {
         return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.getMyWorkspace(principal.getId()));
     }
 
+    @GetMapping("/@{slug}")
+    public GlobalResponse<WorkspaceResponse> getBySlug(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable String slug) {
+        return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.getWorkspaceBySlug(principal.getId(), slug));
+    }
+
     @PostMapping
     public GlobalResponse<WorkspaceResponse> create(
             @AuthenticationPrincipal UserPrincipal principal,
