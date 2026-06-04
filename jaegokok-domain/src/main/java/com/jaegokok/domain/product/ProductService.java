@@ -123,7 +123,7 @@ public class ProductService {
     }
 
     public byte[] downloadQrPng(Long memberId, Long productId) {
-        Workspace workspace = getOwnerWorkspace(memberId);
+        Workspace workspace = getMemberWorkspace(memberId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         if (!product.workspaceId().equals(workspace.id())) {
@@ -133,7 +133,7 @@ public class ProductService {
     }
 
     public byte[] downloadBulkQrPdf(Long memberId, List<Long> productIds) {
-        Workspace workspace = getOwnerWorkspace(memberId);
+        Workspace workspace = getMemberWorkspace(memberId);
         List<Product> products = productRepository.findAllByIds(productIds);
         if (products.size() != productIds.stream().distinct().count()) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
