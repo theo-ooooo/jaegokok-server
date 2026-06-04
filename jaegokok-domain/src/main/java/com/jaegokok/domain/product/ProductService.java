@@ -129,7 +129,7 @@ public class ProductService {
         if (!product.workspaceId().equals(workspace.id())) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
-        return qrCodePort.generateQrPng(product.qrCode());
+        return qrCodePort.generateQrPng(workspace.slug(), product.qrCode());
     }
 
     public byte[] downloadBulkQrPdf(Long memberId, List<Long> productIds) {
@@ -144,7 +144,7 @@ public class ProductService {
             }
         });
         List<QrItem> items = products.stream()
-                .map(p -> new QrItem(p.qrCode(), p.name()))
+                .map(p -> new QrItem(workspace.slug(), p.qrCode(), p.name()))
                 .toList();
         return qrCodePort.generateBulkQrPdf(items);
     }

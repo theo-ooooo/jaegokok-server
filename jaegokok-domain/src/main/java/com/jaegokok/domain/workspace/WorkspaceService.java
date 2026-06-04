@@ -57,6 +57,13 @@ public class WorkspaceService {
     }
 
     @Transactional(readOnly = true)
+    public com.jaegokok.domain.workspace.dto.PublicWorkspaceResponse getPublicWorkspaceBySlug(String slug) {
+        Workspace workspace = workspaceRepository.findBySlug(slug)
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        return com.jaegokok.domain.workspace.dto.PublicWorkspaceResponse.from(workspace, fileUploadPort);
+    }
+
+    @Transactional(readOnly = true)
     public WorkspaceResponse getWorkspaceBySlug(Long requesterId, String slug) {
         Workspace workspace = workspaceRepository.findBySlug(slug)
                 .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));

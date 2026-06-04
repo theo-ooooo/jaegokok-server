@@ -43,3 +43,4 @@ application-secret.yaml
 
 # Test results
 test-results/
+.claude/
