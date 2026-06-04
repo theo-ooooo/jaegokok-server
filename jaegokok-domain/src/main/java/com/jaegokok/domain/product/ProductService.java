@@ -123,28 +123,32 @@ public class ProductService {
     }
 
     public byte[] downloadQrPng(Long memberId, Long productId) {
-        Workspace workspace = getMemberWorkspace(memberId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        if (!product.workspaceId().equals(workspace.id())) {
+        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(product.workspaceId(), memberId)) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
+        Workspace workspace = workspaceRepository.findById(product.workspaceId())
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
         return qrCodePort.generateQrPng(workspace.slug(), product.qrCode());
     }
 
     public byte[] downloadBulkQrPdf(Long memberId, List<Long> productIds) {
-        Workspace workspace = getMemberWorkspace(memberId);
         List<Product> products = productRepository.findAllByIds(productIds);
         if (products.size() != productIds.stream().distinct().count()) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
         }
         products.forEach(product -> {
-            if (!product.workspaceId().equals(workspace.id())) {
+            if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(product.workspaceId(), memberId)) {
                 throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
             }
         });
         List<QrItem> items = products.stream()
-                .map(p -> new QrItem(workspace.slug(), p.qrCode(), p.name()))
+                .map(p -> {
+                    String slug = workspaceRepository.findById(p.workspaceId())
+                            .map(Workspace::slug).orElse("");
+                    return new QrItem(slug, p.qrCode(), p.name());
+                })
                 .toList();
         return qrCodePort.generateBulkQrPdf(items);
     }
