@@ -29,7 +29,6 @@ public class InventoryController {
     @GetMapping("/history")
     public GlobalResponse<Page<InventoryHistoryResponse>> getHistory(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestParam Long workspaceId,
             @RequestParam(required = false) Long productId,
             @RequestParam(required = false) InventoryType type,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateFrom,
@@ -37,7 +36,7 @@ public class InventoryController {
             @PageableDefault(size = 20) Pageable pageable
     ) {
         InventoryHistoryCondition condition = new InventoryHistoryCondition(productId, type, dateFrom, dateTo);
-        return GlobalResponse.success(HttpStatus.OK.value(), inventoryService.getHistory(principal.getId(), workspaceId, condition, pageable));
+        return GlobalResponse.success(HttpStatus.OK.value(), inventoryService.getHistory(principal.getId(), condition, pageable));
     }
 
     @PostMapping("/in")

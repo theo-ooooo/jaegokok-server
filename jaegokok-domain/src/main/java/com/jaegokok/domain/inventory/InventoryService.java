@@ -34,6 +34,15 @@ public class InventoryService {
                 .map(InventoryHistoryResponse::from);
     }
 
+    public Page<InventoryHistoryResponse> getHistory(Long memberId, InventoryHistoryCondition condition, Pageable pageable) {
+        Long workspaceId = workspaceMemberRepository.findAllByMemberId(memberId)
+                .stream().findFirst()
+                .map(wm -> wm.workspaceId())
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
+        return inventoryRecordRepository.findByCondition(workspaceId, condition, pageable)
+                .map(InventoryHistoryResponse::from);
+    }
+
     @Transactional
     public InventoryHistoryResponse recordIn(Long memberId, InventoryRecordRequest request) {
         Product product = findProductAndCheckAccess(memberId, request.productId());

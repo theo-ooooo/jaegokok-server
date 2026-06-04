@@ -65,6 +65,12 @@ public class ProductService {
                 .map(p -> ProductResponse.from(p, fileUploadPort));
     }
 
+    public Page<ProductResponse> findAll(Long memberId, ProductSearchCondition condition, Pageable pageable) {
+        Workspace workspace = getMemberWorkspace(memberId);
+        return productRepository.findByWorkspaceId(workspace.id(), condition, pageable)
+                .map(p -> ProductResponse.from(p, fileUploadPort));
+    }
+
     public ProductResponse findById(Long memberId, Long workspaceId, Long productId) {
         if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(workspaceId, memberId)) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
@@ -72,6 +78,16 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         if (!product.workspaceId().equals(workspaceId)) {
+            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
+        }
+        return ProductResponse.from(product, fileUploadPort);
+    }
+
+    public ProductResponse findById(Long memberId, Long productId) {
+        Workspace workspace = getMemberWorkspace(memberId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        if (!product.workspaceId().equals(workspace.id())) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
         return ProductResponse.from(product, fileUploadPort);
