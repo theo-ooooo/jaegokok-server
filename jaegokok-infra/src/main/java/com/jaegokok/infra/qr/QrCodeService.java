@@ -34,8 +34,8 @@ public class QrCodeService implements QrCodePort {
     private final QrProperties qrProperties;
 
     @Override
-    public byte[] generateQrPng(String qrCode) {
-        String url = qrProperties.baseUrl() + "/" + qrCode;
+    public byte[] generateQrPng(String workspaceSlug, String qrCode) {
+        String url = qrProperties.baseUrl() + "/@" + workspaceSlug + "/scan/" + qrCode;
         try {
             QRCodeWriter writer = new QRCodeWriter();
             BitMatrix matrix = writer.encode(url, BarcodeFormat.QR_CODE, QR_SIZE, QR_SIZE);
@@ -55,7 +55,7 @@ public class QrCodeService implements QrCodePort {
                 PDPage page = new PDPage(PDRectangle.A4);
                 document.addPage(page);
 
-                byte[] qrImageBytes = generateQrPng(item.qrCode());
+                byte[] qrImageBytes = generateQrPng(item.slug(), item.qrCode());
                 PDImageXObject qrImage = PDImageXObject.createFromByteArray(document, qrImageBytes, "qr");
 
                 try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {

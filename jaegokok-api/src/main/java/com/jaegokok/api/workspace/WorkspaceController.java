@@ -52,6 +52,13 @@ public class WorkspaceController {
         return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.updateProfile(principal.getId(), request));
     }
 
+    @GetMapping("/public/@{slug}")
+    public GlobalResponse<com.jaegokok.domain.workspace.dto.PublicWorkspaceResponse> getPublicWorkspace(
+            @PathVariable String slug
+    ) {
+        return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.getPublicWorkspaceBySlug(slug));
+    }
+
     @GetMapping("/check-slug")
     public GlobalResponse<Boolean> checkSlugAvailable(@RequestParam String slug) {
         return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.isSlugAvailable(slug));
