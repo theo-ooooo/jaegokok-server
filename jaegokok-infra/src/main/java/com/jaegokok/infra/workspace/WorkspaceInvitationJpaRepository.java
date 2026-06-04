@@ -14,4 +14,8 @@ public interface WorkspaceInvitationJpaRepository extends JpaRepository<Workspac
     @Modifying
     @Query("UPDATE WorkspaceInvitationEntity w SET w.used = true WHERE w.token = :token AND w.used = false")
     int markUsedByToken(@Param("token") String token);
+
+    @Modifying
+    @Query("DELETE FROM WorkspaceInvitationEntity w WHERE w.workspaceId = :workspaceId AND w.email = :email")
+    void deleteByWorkspaceIdAndEmail(@Param("workspaceId") Long workspaceId, @Param("email") String email);
 }

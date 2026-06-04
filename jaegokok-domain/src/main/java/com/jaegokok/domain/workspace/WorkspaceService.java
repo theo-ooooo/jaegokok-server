@@ -167,6 +167,8 @@ public class WorkspaceService {
                 throw new CustomException(ErrorCode.MEMBER_LIMIT_EXCEEDED);
             }
         }
+        // 기존 미사용 초대 삭제 후 재발송 허용
+        workspaceInvitationRepository.deleteByWorkspaceIdAndEmail(workspace.id(), email);
         WorkspaceInvitation invitation = workspaceInvitationRepository.save(workspace.id(), email, role);
         String inviteUrl = appConfigPort.getBaseUrl() + "/signup?invite=" + invitation.token();
         emailPort.sendInvitation(email, inviteUrl);

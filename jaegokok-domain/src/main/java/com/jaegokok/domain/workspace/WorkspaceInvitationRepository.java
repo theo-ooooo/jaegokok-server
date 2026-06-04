@@ -8,4 +8,5 @@ public interface WorkspaceInvitationRepository {
     Optional<WorkspaceInvitation> findByToken(String token);
     void markUsed(Long id);
     boolean markUsedByToken(String token);
+    void deleteByWorkspaceIdAndEmail(Long workspaceId, String email);
 }

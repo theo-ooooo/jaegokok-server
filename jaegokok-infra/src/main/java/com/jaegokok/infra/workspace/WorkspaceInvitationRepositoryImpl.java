@@ -53,4 +53,8 @@ public class WorkspaceInvitationRepositoryImpl implements WorkspaceInvitationRep
                 e.getRole()
         );
     }
+    @Override
+    public void deleteByWorkspaceIdAndEmail(Long workspaceId, String email) {
+        workspaceInvitationJpaRepository.deleteByWorkspaceIdAndEmail(workspaceId, email);
+    }
 }
