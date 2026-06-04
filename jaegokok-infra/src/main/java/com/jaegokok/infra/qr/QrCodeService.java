@@ -35,7 +35,8 @@ public class QrCodeService implements QrCodePort {
 
     @Override
     public byte[] generateQrPng(String workspaceSlug, String qrCode) {
-        String url = qrProperties.baseUrl() + "/@" + workspaceSlug + "/scan/" + qrCode;
+        String base = qrProperties.baseUrl().replaceAll("/scan$", "").replaceAll("/+$", "");
+        String url = base + "/@" + workspaceSlug + "/scan/" + qrCode;
         try {
             QRCodeWriter writer = new QRCodeWriter();
             BitMatrix matrix = writer.encode(url, BarcodeFormat.QR_CODE, QR_SIZE, QR_SIZE);
