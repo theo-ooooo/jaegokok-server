@@ -37,6 +37,12 @@ public class WorkspaceMemberRepositoryImpl implements WorkspaceMemberRepository 
     }
 
     @Override
+    public List<WorkspaceMember> findAllByMemberId(Long memberId) {
+        return workspaceMemberJpaRepository.findAllByMember_Id(memberId)
+                .stream().map(this::toWorkspaceMember).toList();
+    }
+
+    @Override
     public Optional<WorkspaceMember> findById(Long id) {
         return workspaceMemberJpaRepository.findById(id)
                 .map(this::toWorkspaceMember);

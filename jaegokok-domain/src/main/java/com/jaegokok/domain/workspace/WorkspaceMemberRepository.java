@@ -8,6 +8,7 @@ import java.util.Optional;
 public interface WorkspaceMemberRepository {
     WorkspaceMember save(Long workspaceId, Long memberId, WorkspaceMemberRole role);
     List<WorkspaceMember> findByWorkspaceId(Long workspaceId);
+    List<WorkspaceMember> findAllByMemberId(Long memberId);
     Optional<WorkspaceMember> findById(Long id);
     Optional<WorkspaceMember> findByMemberId(Long memberId);
     Optional<WorkspaceMember> findByWorkspaceIdAndMemberId(Long workspaceId, Long memberId);

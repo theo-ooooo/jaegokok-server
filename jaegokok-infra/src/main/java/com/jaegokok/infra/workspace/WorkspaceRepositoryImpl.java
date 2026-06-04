@@ -29,7 +29,13 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
     public Workspace save(Long ownerId, String name, String description, WorkspacePlan plan) {
         MemberEntity member = memberJpaRepository.findById(ownerId).orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
         WorkspaceEntity workspace = WorkspaceEntity.from(member, name, description, plan);
+        return toWorkspace(workspaceJpaRepository.save(workspace));
+    }
 
+    @Override
+    public Workspace saveWithSlug(Long ownerId, String name, String description, WorkspacePlan plan, String slug) {
+        MemberEntity member = memberJpaRepository.findById(ownerId).orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        WorkspaceEntity workspace = WorkspaceEntity.from(member, name, description, plan, slug);
         return toWorkspace(workspaceJpaRepository.save(workspace));
     }
 
@@ -44,6 +50,11 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
     }
 
     @Override
+    public Optional<Workspace> findBySlug(String slug) {
+        return workspaceJpaRepository.findBySlug(slug).map(this::toWorkspace);
+    }
+
+    @Override
     public List<Workspace> findAllByMemberId(Long memberId) {
         return workspaceQueryRepository.findAllByMemberId(memberId)
                 .stream().map(this::toWorkspace).toList();
@@ -52,6 +63,11 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
     @Override
     public boolean existsByOwnerId(Long ownerId) {
         return workspaceJpaRepository.existsByOwner_Id(ownerId);
+    }
+
+    @Override
+    public boolean existsBySlug(String slug) {
+        return workspaceJpaRepository.existsBySlug(slug);
     }
 
     @Override
@@ -75,7 +91,7 @@ public class WorkspaceRepositoryImpl implements WorkspaceRepository {
                 .map(img -> new Image(img.getId(), img.getEntityType(), img.getEntityId(), img.getOriginalPath(), img.getWebpPath(), img.getBucket(), img.getCreatedAt()))
                 .orElse(null);
         return new Workspace(e.getId(), e.getOwner().getId(), e.getName(), e.getDescription(), e.getPlan(),
-                e.getBusinessNumber(), e.getAddress(), e.getPhone(), logo, e.getCreatedAt());
+                e.getBusinessNumber(), e.getAddress(), e.getPhone(), e.getSlug(), logo, e.getCreatedAt());
     }
 
 }

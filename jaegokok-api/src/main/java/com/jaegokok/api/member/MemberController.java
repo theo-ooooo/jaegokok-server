@@ -7,6 +7,7 @@ import com.jaegokok.domain.member.dto.MemberResponse;
 import com.jaegokok.domain.workspace.WorkspaceService;
 import com.jaegokok.domain.workspace.dto.UpdateMemberRoleRequest;
 import com.jaegokok.domain.workspace.dto.WorkspaceMemberResponse;
+import com.jaegokok.domain.workspace.dto.WorkspaceSummaryResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,11 @@ public class MemberController {
     @GetMapping("/me")
     public GlobalResponse<MemberResponse> getMe(@AuthenticationPrincipal UserPrincipal principal) {
         return GlobalResponse.success(HttpStatus.OK.value(), memberService.getMe(principal.getId()));
+    }
+
+    @GetMapping("/workspaces")
+    public GlobalResponse<List<WorkspaceSummaryResponse>> listMyWorkspaces(@AuthenticationPrincipal UserPrincipal principal) {
+        return GlobalResponse.success(HttpStatus.OK.value(), workspaceService.listMyWorkspaces(principal.getId()));
     }
 
     @GetMapping

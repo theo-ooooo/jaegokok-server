@@ -40,12 +40,16 @@ public class WorkspaceEntity extends BaseEntity {
     @Column(length = 50)
     private String phone;
 
+    @Column(length = 50, unique = true)
+    private String slug;
+
     @Builder
-    private WorkspaceEntity(MemberEntity owner, String name, String description, WorkspacePlan plan) {
+    private WorkspaceEntity(MemberEntity owner, String name, String description, WorkspacePlan plan, String slug) {
         this.owner = owner;
         this.name = name;
         this.description = description;
         this.plan = plan;
+        this.slug = slug;
     }
 
     public static WorkspaceEntity from(MemberEntity owner, String name, String description, WorkspacePlan plan) {
@@ -54,6 +58,16 @@ public class WorkspaceEntity extends BaseEntity {
                 .name(name)
                 .description(description)
                 .plan(plan)
+                .build();
+    }
+
+    public static WorkspaceEntity from(MemberEntity owner, String name, String description, WorkspacePlan plan, String slug) {
+        return WorkspaceEntity.builder()
+                .owner(owner)
+                .name(name)
+                .description(description)
+                .plan(plan)
+                .slug(slug)
                 .build();
     }
 
@@ -66,6 +80,10 @@ public class WorkspaceEntity extends BaseEntity {
         if (businessNumber != null) this.businessNumber = businessNumber;
         if (address != null) this.address = address;
         if (phone != null) this.phone = phone;
+    }
+
+    public void updateSlug(String slug) {
+        this.slug = slug;
     }
 
 }
