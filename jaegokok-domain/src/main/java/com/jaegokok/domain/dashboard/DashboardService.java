@@ -23,17 +23,26 @@ public class DashboardService {
     private static final int LOW_STOCK_PREVIEW_LIMIT = 10;
 
     private final DashboardRepository dashboardRepository;
-    private final WorkspaceRepository workspaceRepository;
     private final WorkspaceMemberRepository workspaceMemberRepository;
+    private final WorkspaceRepository workspaceRepository;
 
-    public DashboardResponse getDashboard(Long memberId, String workspaceSlug) {
-        com.jaegokok.domain.workspace.Workspace ws = workspaceRepository.findBySlug(workspaceSlug)
-                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND));
-        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(ws.id(), memberId)) {
-            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
-        }
-        Long workspaceId = ws.id();
+    /** 신규: Controller에서 checkAccess 완료 후 호출 — 내부 재검증 없음 */
+    public DashboardResponse getDashboard(Long workspaceId) {
+        return buildDashboard(workspaceId);
+    }
 
+    /** @deprecated 레거시 경로용. findByMemberId.findFirst() 패턴으로 다중 워크스페이스 미지원. */
+    @Deprecated
+    public DashboardResponse getDashboard(Long memberId, boolean legacy) {
+        Long workspaceId = workspaceRepository.findByOwnerId(memberId)
+                .or(() -> workspaceMemberRepository.findByMemberId(memberId)
+                        .flatMap(wm -> workspaceRepository.findById(wm.workspaceId())))
+                .orElseThrow(() -> new CustomException(ErrorCode.WORKSPACE_NOT_FOUND))
+                .id();
+        return buildDashboard(workspaceId);
+    }
+
+    private DashboardResponse buildDashboard(Long workspaceId) {
         LocalDate today = LocalDate.now();
         long totalProducts = dashboardRepository.countProducts(workspaceId);
         long lowStockCount = dashboardRepository.countLowStockProducts(workspaceId);

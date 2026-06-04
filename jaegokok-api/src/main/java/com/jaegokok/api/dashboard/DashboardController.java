@@ -19,9 +19,8 @@ public class DashboardController {
 
     @GetMapping
     public GlobalResponse<DashboardResponse> getDashboard(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @RequestParam String workspaceSlug
+            @AuthenticationPrincipal UserPrincipal principal
     ) {
-        return GlobalResponse.success(HttpStatus.OK.value(), dashboardService.getDashboard(principal.getId(), workspaceSlug));
+        return GlobalResponse.success(HttpStatus.OK.value(), dashboardService.getDashboard(principal.getId(), true));
     }
 }
