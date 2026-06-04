@@ -12,17 +12,24 @@ import com.jaegokok.domain.inventory.InventoryService;
 import com.jaegokok.domain.inventory.dto.InventoryHistoryCondition;
 import com.jaegokok.domain.inventory.dto.InventoryHistoryResponse;
 import com.jaegokok.domain.product.ProductService;
+import com.jaegokok.domain.product.dto.CreateProductRequest;
 import com.jaegokok.domain.product.dto.ProductResponse;
 import com.jaegokok.domain.product.dto.ProductSearchCondition;
 import com.jaegokok.domain.workspace.WorkspaceMemberRepository;
+import com.jaegokok.api.util.FileValidator;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 import java.time.LocalDate;
 
@@ -43,6 +50,31 @@ public class WorkspaceResourceController {
         if (role == WorkspaceMemberRole.EMPLOYEE) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
+    }
+
+    @PostMapping("/products")
+    @ResponseStatus(HttpStatus.CREATED)
+    public GlobalResponse<ProductResponse> createProduct(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long workspaceId,
+            @Valid @RequestBody CreateProductRequest request
+    ) {
+        checkAccess(principal.getId(), workspaceId);
+        return GlobalResponse.success(HttpStatus.CREATED.value(), productService.createInWorkspace(workspaceId, request));
+    }
+
+    @PostMapping(value = "/products/{productId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public GlobalResponse<ProductResponse> uploadProductImage(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Long workspaceId,
+            @PathVariable Long productId,
+            @RequestPart MultipartFile file
+    ) throws IOException {
+        checkAccess(principal.getId(), workspaceId);
+        FileValidator.validateImage(file);
+        return GlobalResponse.success(HttpStatus.OK.value(),
+                productService.uploadImageInWorkspace(workspaceId, productId,
+                        FileValidator.safeFilename(file), file.getBytes(), file.getContentType()));
     }
 
     @GetMapping("/products")

@@ -44,6 +44,19 @@ public class ProductService {
     private final SubscriptionPlanRepository subscriptionPlanRepository;
 
     @Transactional
+    public ProductResponse createInWorkspace(Long workspaceId, CreateProductRequest request) {
+        WorkspacePlan effectivePlan = workspaceService.getEffectivePlan(workspaceId);
+        int limit = subscriptionPlanRepository.findByPlanKey(effectivePlan.name())
+                .map(sp -> sp.isUnlimitedProducts() ? Integer.MAX_VALUE : sp.productLimit())
+                .orElse(Integer.MAX_VALUE);
+        if (productRepository.countByWorkspaceId(workspaceId) >= limit) {
+            throw new CustomException(ErrorCode.PRODUCT_LIMIT_EXCEEDED);
+        }
+        String qrCode = UUID.randomUUID().toString();
+        return ProductResponse.from(productRepository.save(workspaceId, request, qrCode), fileUploadPort);
+    }
+
+    @Transactional
     public ProductResponse create(Long memberId, CreateProductRequest request) {
         Workspace workspace = getOwnerWorkspace(memberId);
         WorkspacePlan effectivePlan = workspaceService.getEffectivePlan(workspace.id());
@@ -110,7 +123,7 @@ public class ProductService {
     }
 
     public byte[] downloadQrPng(Long memberId, Long productId) {
-        Workspace workspace = getOwnerWorkspace(memberId);
+        Workspace workspace = getMemberWorkspace(memberId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
         if (!product.workspaceId().equals(workspace.id())) {
@@ -120,7 +133,7 @@ public class ProductService {
     }
 
     public byte[] downloadBulkQrPdf(Long memberId, List<Long> productIds) {
-        Workspace workspace = getOwnerWorkspace(memberId);
+        Workspace workspace = getMemberWorkspace(memberId);
         List<Product> products = productRepository.findAllByIds(productIds);
         if (products.size() != productIds.stream().distinct().count()) {
             throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
@@ -137,6 +150,16 @@ public class ProductService {
     }
 
     @Transactional
+    public ProductResponse uploadImageInWorkspace(Long workspaceId, Long productId, String originalFilename, byte[] content, String contentType) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        if (!product.workspaceId().equals(workspaceId)) {
+            throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
+        }
+        return doUploadImage(productId, originalFilename, content, contentType);
+    }
+
+    @Transactional
     public ProductResponse uploadImage(Long memberId, Long productId, String originalFilename, byte[] content, String contentType) {
         Workspace workspace = getOwnerWorkspace(memberId);
         Product product = productRepository.findById(productId)
@@ -144,6 +167,10 @@ public class ProductService {
         if (!product.workspaceId().equals(workspace.id())) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
+        return doUploadImage(productId, originalFilename, content, contentType);
+    }
+
+    private ProductResponse doUploadImage(Long productId, String originalFilename, byte[] content, String contentType) {
         String originalKey = fileUploadPort.upload("products/" + productId + "/original", originalFilename, content, contentType);
         String webpKey = tryConvertAndUploadWebp("products/" + productId + "/webp", originalFilename, content);
         imageRepository.deleteByEntity(ImageEntityType.PRODUCT, productId);
