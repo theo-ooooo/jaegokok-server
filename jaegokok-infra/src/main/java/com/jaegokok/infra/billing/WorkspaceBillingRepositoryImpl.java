@@ -25,6 +25,19 @@ public class WorkspaceBillingRepositoryImpl implements WorkspaceBillingRepositor
     }
 
     @Override
+    public WorkspaceBilling savePending(Long workspaceId, String billingKey, String customerKey, Long planId) {
+        WorkspaceBillingEntity entity = WorkspaceBillingEntity.createPending(workspaceId, billingKey, customerKey, planId);
+        return toBilling(workspaceBillingJpaRepository.save(entity));
+    }
+
+    @Override
+    public void activate(Long id) {
+        WorkspaceBillingEntity entity = workspaceBillingJpaRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.BAD_REQUEST));
+        entity.activate();
+    }
+
+    @Override
     public Optional<WorkspaceBilling> findByWorkspaceId(Long workspaceId) {
         return workspaceBillingJpaRepository.findByWorkspaceId(workspaceId).map(this::toBilling);
     }

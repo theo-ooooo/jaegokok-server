@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -44,15 +45,26 @@ public class BillingService {
         TossPaymentPort.BillingKeyResult keyResult = tossPaymentPort.issueBillingKey(authKey, customerKey);
         if (!keyResult.success()) throw new CustomException(ErrorCode.PAYMENT_FAILED);
 
-        String orderId = "JAEGOK-" + planKey + "-" + System.currentTimeMillis();
+        WorkspaceBilling billing = workspaceBillingRepository.savePending(workspace.id(), keyResult.billingKey(), customerKey, plan.id());
+
+        String orderId = "JAEGOK-" + planKey + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         String orderName = "재고콕 " + plan.name() + " 플랜";
 
-        TossPaymentPort.TossConfirmResult chargeResult = tossPaymentPort.chargeWithBillingKey(
-                keyResult.billingKey(), orderId, orderName, plan.priceKrw(), customerKey);
+        TossPaymentPort.TossConfirmResult chargeResult;
+        try {
+            chargeResult = tossPaymentPort.chargeWithBillingKey(
+                    keyResult.billingKey(), orderId, orderName, plan.priceKrw(), customerKey);
+        } catch (Exception e) {
+            workspaceBillingRepository.cancel(billing.id());
+            throw new CustomException(ErrorCode.PAYMENT_FAILED);
+        }
 
-        if (!chargeResult.success()) throw new CustomException(ErrorCode.PAYMENT_FAILED);
+        if (!chargeResult.success()) {
+            workspaceBillingRepository.cancel(billing.id());
+            throw new CustomException(ErrorCode.PAYMENT_FAILED);
+        }
 
-        WorkspaceBilling billing = workspaceBillingRepository.save(workspace.id(), keyResult.billingKey(), customerKey, plan.id());
+        workspaceBillingRepository.activate(billing.id());
 
         BillingPayment payment = billingPaymentRepository.save(workspace.id(), orderId, plan.id(), plan.priceKrw(), billing.id());
         billingPaymentRepository.confirm(payment.id(), orderId, chargeResult.message());
@@ -67,7 +79,7 @@ public class BillingService {
             try {
                 SubscriptionPlan plan = subscriptionPlanRepository.findById(billing.planId()).orElse(null);
                 if (plan == null) continue;
-                String orderId = "JAEGOK-RENEW-" + plan.planKey() + "-" + System.currentTimeMillis();
+                String orderId = "JAEGOK-RENEW-" + plan.planKey() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
                 String orderName = "재고콕 " + plan.name() + " 플랜 (갱신)";
                 TossPaymentPort.TossConfirmResult result = tossPaymentPort.chargeWithBillingKey(
                         billing.billingKey(), orderId, orderName, plan.priceKrw(), billing.customerKey());

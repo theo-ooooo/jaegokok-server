@@ -47,6 +47,22 @@ public class WorkspaceBillingEntity extends BaseEntity {
         return e;
     }
 
+    public static WorkspaceBillingEntity createPending(Long workspaceId, String billingKey, String customerKey, Long planId) {
+        WorkspaceBillingEntity e = new WorkspaceBillingEntity();
+        e.workspaceId = workspaceId;
+        e.billingKey = billingKey;
+        e.customerKey = customerKey;
+        e.planId = planId;
+        e.status = "PENDING";
+        e.nextBillingDate = LocalDate.now().plusMonths(1);
+        return e;
+    }
+
+    public void activate() {
+        this.status = "ACTIVE";
+        this.nextBillingDate = LocalDate.now().plusMonths(1);
+    }
+
     public void cancel() {
         this.status = "CANCELLED";
     }
