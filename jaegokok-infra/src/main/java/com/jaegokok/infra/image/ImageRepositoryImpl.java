@@ -9,7 +9,9 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -31,6 +33,17 @@ public class ImageRepositoryImpl implements ImageRepository {
     @Override
     public Optional<Image> findFirstByEntity(ImageEntityType entityType, Long entityId) {
         return imageJpaRepository.findFirstByEntityTypeAndEntityId(entityType, entityId).map(this::toImage);
+    }
+
+    @Override
+    public Map<Long, Image> findFirstByEntityIds(ImageEntityType entityType, List<Long> entityIds) {
+        if (entityIds == null || entityIds.isEmpty()) return Map.of();
+        return imageJpaRepository.findByEntityTypeAndEntityIdIn(entityType, entityIds).stream()
+                .collect(Collectors.toMap(
+                        ImageEntity::getEntityId,
+                        this::toImage,
+                        (a, b) -> a  // keep first
+                ));
     }
 
     @Override
