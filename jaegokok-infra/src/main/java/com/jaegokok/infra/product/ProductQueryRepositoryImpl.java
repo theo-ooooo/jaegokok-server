@@ -36,8 +36,8 @@ public class ProductQueryRepositoryImpl implements ProductQueryRepository {
                 builder.and(product.category.eq(condition.category()));
             }
             if (Boolean.TRUE.equals(condition.lowStock())) {
-                // TODO: Inventory 도메인 연동 후 currentStock < minStockLevel 조건으로 교체
-                builder.and(product.minStockLevel.gt(0));
+                builder.and(product.minStockLevel.gt(0))
+                       .and(product.currentStock.lt(product.minStockLevel));
             }
         }
 

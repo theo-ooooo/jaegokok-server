@@ -112,10 +112,9 @@ public class ProductService {
 
     @Transactional
     public void delete(Long memberId, Long productId) {
-        Workspace workspace = getOwnerWorkspace(memberId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-        if (!product.workspaceId().equals(workspace.id())) {
+        if (!workspaceMemberRepository.existsByWorkspaceIdAndMemberId(product.workspaceId(), memberId)) {
             throw new CustomException(ErrorCode.WORKSPACE_ACCESS_DENIED);
         }
         productRepository.deleteById(productId);
