@@ -1,6 +1,5 @@
 package com.jaegokok.api.security;
 
-import com.jaegokok.common.ErrorCode;
 import com.jaegokok.domain.auth.JwtProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -8,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -57,8 +57,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            } catch (JwtException | IllegalArgumentException ignored) {
-                // 유효하지 않은 토큰은 인증 없이 통과 — SecurityConfig에서 인가 결정
+            } catch (JwtException | IllegalArgumentException e) {
+                // 토큰이 존재하지만 유효하지 않음 (만료 포함) → 401 반환
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8");
+                response.getWriter().write("{\"status\":401,\"message\":\"토큰이 만료되었거나 유효하지 않습니다.\"}");
+                return;
             }
         }
 
