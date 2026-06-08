@@ -7,13 +7,16 @@ import com.jaegokok.core.product.QProductEntity;
 import com.jaegokok.core.workspace.QWorkspaceEntity;
 import com.jaegokok.domain.inventory.dto.InventoryHistoryCondition;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,12 +54,23 @@ public class InventoryRecordQueryRepositoryImpl implements InventoryRecordQueryR
         if (condition.dateFrom() != null) builder.and(ir.createdAt.goe(condition.dateFrom().atStartOfDay()));
         if (condition.dateTo() != null) builder.and(ir.createdAt.lt(condition.dateTo().plusDays(1).atStartOfDay()));
 
+        List<OrderSpecifier<?>> orders = new ArrayList<>();
+        for (Sort.Order o : pageable.getSort()) {
+            boolean asc = o.isAscending();
+            switch (o.getProperty()) {
+                case "quantity" -> orders.add(asc ? ir.quantity.asc() : ir.quantity.desc());
+                case "productName" -> orders.add(asc ? ir.product.name.asc() : ir.product.name.desc());
+                default -> orders.add(asc ? ir.createdAt.asc() : ir.createdAt.desc());
+            }
+        }
+        if (orders.isEmpty()) orders.add(ir.createdAt.desc());
+
         List<InventoryRecordEntity> content = queryFactory.selectFrom(ir)
                 .join(ir.product, product).fetchJoin()
                 .join(ir.product.workspace, workspace).fetchJoin()
                 .join(ir.createdBy, createdBy).fetchJoin()
                 .where(builder)
-                .orderBy(ir.createdAt.desc())
+                .orderBy(orders.toArray(OrderSpecifier[]::new))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
